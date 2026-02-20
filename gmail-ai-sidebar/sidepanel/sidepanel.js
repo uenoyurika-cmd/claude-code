@@ -30,7 +30,7 @@ const sendBtn = document.getElementById("send-btn");
 
 // ---- State ----
 let apiKey = "";
-let model = "gemini-2.5-flash-preview-05-20";
+let model = "gemini-2.5-flash-lite";
 let isGenerating = false;
 
 // ---- Initialization ----
@@ -38,7 +38,7 @@ async function init() {
   const stored = await chrome.storage.local.get(["apiKey", "model"]);
   if (stored.apiKey) {
     apiKey = stored.apiKey;
-    model = stored.model || "gemini-2.5-flash-preview-05-20";
+    model = stored.model || "gemini-2.5-flash-lite";
     showChatScreen();
   } else {
     showSettingsScreen();
