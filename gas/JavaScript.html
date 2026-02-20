@@ -1,0 +1,245 @@
+<script>
+  // 画像データ格納用
+  let scheduleImages = [];
+
+  /**
+   * 画像アップロードエリアの初期化
+   */
+  function initImageUpload() {
+    const dropArea = document.getElementById('imageDropArea');
+    const fileInput = document.getElementById('scheduleFileInput');
+
+    // クリックでファイル選択
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    // ドラッグ&ドロップ
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('dragover');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('dragover');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    // ファイル選択
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+  }
+
+  /**
+   * ファイルを処理してBase64に変換
+   */
+  function handleFiles(files) {
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        scheduleImages.push(e.target.result);
+        renderImagePreviews();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  /**
+   * 画像プレビューを描画
+   */
+  function renderImagePreviews() {
+    const container = document.getElementById('imagePreviewContainer');
+    container.innerHTML = '';
+
+    scheduleImages.forEach((img, index) => {
+      const div = document.createElement('div');
+      div.className = 'image-preview';
+      div.innerHTML = `
+        <img src="${img}" alt="スケジュール画像 ${index + 1}">
+        <button class="remove-btn" onclick="removeImage(${index})">&times;</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  /**
+   * 画像を削除
+   */
+  function removeImage(index) {
+    scheduleImages.splice(index, 1);
+    renderImagePreviews();
+  }
+
+  /**
+   * フォームデータを収集する
+   */
+  function collectFormData() {
+    return {
+      customerName: document.getElementById('customerName').value,
+      accountId: document.getElementById('accountId').value,
+      productionContent: document.getElementById('productionContent').value,
+      purpose: document.getElementById('purpose').value,
+      challenges: document.getElementById('challenges').value,
+      designRequest: document.getElementById('designRequest').value,
+      scheduleImages: scheduleImages,
+      scope: {
+        structureProposal: document.getElementById('scopeStructure').checked,
+        designCreation: document.getElementById('scopeDesign').checked,
+        designProvided: document.getElementById('scopeDesignProvided').checked,
+        implementation: document.getElementById('scopeImplementation').checked,
+        copyCreation: document.getElementById('scopeCopy').checked,
+        copyProvided: document.getElementById('scopeCopyProvided').checked,
+        siteCopy: document.getElementById('scopeSiteCopy').checked,
+      },
+    };
+  }
+
+  /**
+   * バリデーション
+   */
+  function validateForm() {
+    const required = ['customerName', 'productionContent'];
+    for (const id of required) {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        el.focus();
+        alert(el.previousElementSibling.textContent + 'を入力してください。');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * プレビュー生成
+   */
+  function generatePreview() {
+    if (!validateForm()) return;
+
+    const formData = collectFormData();
+    showLoading('AIでテキストを生成中...');
+
+    google.script.run
+      .withSuccessHandler(handlePreviewSuccess)
+      .withFailureHandler(handleError)
+      .generatePreview(formData);
+  }
+
+  /**
+   * プレビュー成功時のハンドラ
+   */
+  function handlePreviewSuccess(result) {
+    hideLoading();
+
+    if (!result.success) {
+      showError(result.error);
+      return;
+    }
+
+    const preview = result.preview;
+    const section = document.getElementById('previewSection');
+    section.classList.add('active');
+
+    document.getElementById('previewPurpose').textContent = preview.purpose;
+    document.getElementById('previewChallenges').textContent = preview.challenges;
+    document.getElementById('previewDesign').textContent = preview.designProposal;
+    document.getElementById('previewReferences').textContent = preview.designReferences;
+    document.getElementById('previewSchedule').textContent = preview.scheduleText || '（画像未添付）';
+    document.getElementById('previewScope').textContent = preview.scopeText;
+
+    // プレビューセクションまでスクロール
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
+   * スライド生成を実行
+   */
+  function submitForm() {
+    if (!validateForm()) return;
+
+    if (!confirm('スライドを生成しますか？')) return;
+
+    const formData = collectFormData();
+    showLoading('制作MTG資料を生成中...\nClaude AIによるテキスト生成とスライド作成を行っています。');
+
+    google.script.run
+      .withSuccessHandler(handleSubmitSuccess)
+      .withFailureHandler(handleError)
+      .processForm(formData);
+  }
+
+  /**
+   * 送信成功時のハンドラ
+   */
+  function handleSubmitSuccess(result) {
+    hideLoading();
+
+    const resultSection = document.getElementById('resultSection');
+    resultSection.classList.add('active');
+
+    if (result.success) {
+      resultSection.innerHTML = `
+        <div class="result-success">
+          <h3>資料が生成されました</h3>
+          <p style="margin-top: 12px;">
+            <a href="${result.slideUrl}" target="_blank">
+              Google Slides で開く →
+            </a>
+          </p>
+        </div>
+      `;
+    } else {
+      showError(result.error);
+    }
+
+    resultSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
+   * エラーハンドラ
+   */
+  function handleError(error) {
+    hideLoading();
+    showError(error.message || 'エラーが発生しました。');
+  }
+
+  /**
+   * エラー表示
+   */
+  function showError(message) {
+    const resultSection = document.getElementById('resultSection');
+    resultSection.classList.add('active');
+    resultSection.innerHTML = `
+      <div class="result-error">
+        <strong>エラーが発生しました</strong>
+        <p style="margin-top: 8px;">${message}</p>
+      </div>
+    `;
+    resultSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
+   * ローディング表示
+   */
+  function showLoading(message) {
+    const overlay = document.getElementById('loadingOverlay');
+    document.getElementById('loadingText').textContent = message;
+    overlay.classList.add('active');
+  }
+
+  /**
+   * ローディング非表示
+   */
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+  }
+
+  // ページ読み込み時に初期化
+  document.addEventListener('DOMContentLoaded', initImageUpload);
+</script>

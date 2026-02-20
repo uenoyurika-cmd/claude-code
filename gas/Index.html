@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <?!= include('Stylesheet'); ?>
+</head>
+<body>
+  <!-- ローディングオーバーレイ -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p id="loadingText" class="loading-text">処理中...</p>
+  </div>
+
+  <div class="container">
+    <!-- ヘッダー -->
+    <div class="header">
+      <h1>制作MTG資料 自動生成ツール</h1>
+      <p>入力情報をもとにAIが制作MTG資料を自動生成します</p>
+    </div>
+
+    <!-- 基本情報 -->
+    <div class="card">
+      <h2 class="card-title">基本情報</h2>
+
+      <div class="form-group">
+        <label for="customerName">顧客名 *</label>
+        <input type="text" id="customerName" placeholder="例: 株式会社○○">
+      </div>
+
+      <div class="form-group">
+        <label for="accountId">アカウントID</label>
+        <input type="text" id="accountId" placeholder="例: ACC-12345">
+      </div>
+
+      <div class="form-group">
+        <label for="productionContent">制作内容 *</label>
+        <input type="text" id="productionContent" placeholder="例: コーポレートサイトリニューアル">
+      </div>
+    </div>
+
+    <!-- 制作目的・課題 -->
+    <div class="card">
+      <h2 class="card-title">制作目的・課題</h2>
+
+      <div class="form-group">
+        <label for="purpose">制作目的</label>
+        <p class="hint">顧客の要望・目的（デザイン・数値・更新性等）など制作を受注した理由を記載</p>
+        <textarea id="purpose" placeholder="例: 現サイトのデザインが古く、スマホ対応もできていないためリニューアルしたい。問い合わせ数を増やしたい。"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="challenges">既存サイトの課題</label>
+        <p class="hint">構成・数値・デザイン・更新性の課題等</p>
+        <textarea id="challenges" placeholder="例: ・直帰率が70%を超えている&#10;・モバイル対応していない&#10;・更新にHTMLの知識が必要"></textarea>
+      </div>
+    </div>
+
+    <!-- デザイン要望 -->
+    <div class="card">
+      <h2 class="card-title">デザイン要望・提案希望</h2>
+
+      <div class="form-group">
+        <label for="designRequest">デザイン要望</label>
+        <p class="hint">提案したいデザインの方向性を記入（色・参考サイト・顧客要望等）</p>
+        <textarea id="designRequest" placeholder="例: ・清潔感のある青系の配色&#10;・写真を大きく使いたい&#10;・競合のA社のサイトのような雰囲気"></textarea>
+      </div>
+    </div>
+
+    <!-- スケジュール -->
+    <div class="card">
+      <h2 class="card-title">制作スケジュール</h2>
+
+      <div class="form-group">
+        <label>ガントチャート画像</label>
+        <p class="hint">ガントの対象部分スクリーンショットを添付（複数画像可能）※日付・曜日が入るように</p>
+
+        <div id="imageDropArea" class="image-upload-area">
+          <div class="icon">&#128247;</div>
+          <p>クリックまたはドラッグ&ドロップで画像をアップロード</p>
+        </div>
+        <input type="file" id="scheduleFileInput" accept="image/*" multiple style="display:none">
+
+        <div id="imagePreviewContainer" class="image-preview-container"></div>
+      </div>
+    </div>
+
+    <!-- 役務範囲 -->
+    <div class="card">
+      <h2 class="card-title">役務範囲</h2>
+
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeStructure">
+          <label for="scopeStructure">構成提案</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeDesign">
+          <label for="scopeDesign">デザイン作成</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeDesignProvided">
+          <label for="scopeDesignProvided">デザイン先方支給</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeImplementation">
+          <label for="scopeImplementation">実装</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeCopy">
+          <label for="scopeCopy">原稿作成</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeCopyProvided">
+          <label for="scopeCopyProvided">原稿先方支給</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="scopeSiteCopy">
+          <label for="scopeSiteCopy">サイトコピー</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作ボタン -->
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="generatePreview()">
+        プレビュー生成
+      </button>
+      <button class="btn btn-primary" onclick="submitForm()">
+        スライド生成
+      </button>
+    </div>
+
+    <!-- プレビューセクション -->
+    <div id="previewSection" class="preview-section">
+      <div class="card" style="margin-top: 24px;">
+        <h2 class="card-title">生成プレビュー</h2>
+
+        <div class="preview-item">
+          <h4>制作目的</h4>
+          <pre id="previewPurpose"></pre>
+        </div>
+
+        <div class="preview-item">
+          <h4>既存サイトの課題</h4>
+          <pre id="previewChallenges"></pre>
+        </div>
+
+        <div class="preview-item">
+          <h4>デザイン要望・提案</h4>
+          <pre id="previewDesign"></pre>
+        </div>
+
+        <div class="preview-item">
+          <h4>デザイン参考サイト</h4>
+          <pre id="previewReferences"></pre>
+        </div>
+
+        <div class="preview-item">
+          <h4>制作スケジュール</h4>
+          <pre id="previewSchedule"></pre>
+        </div>
+
+        <div class="preview-item">
+          <h4>役務範囲</h4>
+          <pre id="previewScope"></pre>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="submitForm()">
+            この内容でスライドを生成
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 結果セクション -->
+    <div id="resultSection" class="result-section" style="margin-top: 24px;"></div>
+  </div>
+
+  <?!= include('JavaScript'); ?>
+</body>
+</html>
