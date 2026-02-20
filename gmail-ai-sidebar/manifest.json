@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Gmail AI ビジネスメール アシスタント",
+  "version": "1.0.0",
+  "description": "AIがあなたの文章を丁寧なビジネスメールに変換します",
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://api.anthropic.com/*"
+  ],
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "ビジネスメール アシスタント"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
