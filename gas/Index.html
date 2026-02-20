@@ -7,174 +7,386 @@
 <body>
   <!-- ローディングオーバーレイ -->
   <div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p id="loadingText" class="loading-text">処理中...</p>
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p class="loading-title">生成中</p>
+      <p id="loadingText" class="loading-text">処理中...</p>
+      <div class="loading-progress">
+        <div class="loading-progress-bar"></div>
+      </div>
+    </div>
   </div>
 
-  <div class="container">
-    <!-- ヘッダー -->
-    <div class="header">
-      <h1>制作MTG資料 自動生成ツール</h1>
-      <p>入力情報をもとにAIが制作MTG資料を自動生成します</p>
-    </div>
-
-    <!-- 基本情報 -->
-    <div class="card">
-      <h2 class="card-title">基本情報</h2>
-
-      <div class="form-group">
-        <label for="customerName">顧客名 *</label>
-        <input type="text" id="customerName" placeholder="例: 株式会社○○">
-      </div>
-
-      <div class="form-group">
-        <label for="accountId">アカウントID</label>
-        <input type="text" id="accountId" placeholder="例: ACC-12345">
-      </div>
-
-      <div class="form-group">
-        <label for="productionContent">制作内容 *</label>
-        <input type="text" id="productionContent" placeholder="例: コーポレートサイトリニューアル">
+  <!-- 確認ダイアログ -->
+  <div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-card">
+      <h3>スライドを生成</h3>
+      <p>入力内容をもとにAIがテキストを生成し、Google Slidesの資料を作成します。</p>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" onclick="hideConfirm()">キャンセル</button>
+        <button class="btn btn-primary" onclick="confirmSubmit()">
+          <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          生成する
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- 制作目的・課題 -->
-    <div class="card">
-      <h2 class="card-title">制作目的・課題</h2>
+  <div class="dashboard">
 
-      <div class="form-group">
-        <label for="purpose">制作目的</label>
-        <p class="hint">顧客の要望・目的（デザイン・数値・更新性等）など制作を受注した理由を記載</p>
-        <textarea id="purpose" placeholder="例: 現サイトのデザインが古く、スマホ対応もできていないためリニューアルしたい。問い合わせ数を増やしたい。"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="challenges">既存サイトの課題</label>
-        <p class="hint">構成・数値・デザイン・更新性の課題等</p>
-        <textarea id="challenges" placeholder="例: ・直帰率が70%を超えている&#10;・モバイル対応していない&#10;・更新にHTMLの知識が必要"></textarea>
-      </div>
-    </div>
-
-    <!-- デザイン要望 -->
-    <div class="card">
-      <h2 class="card-title">デザイン要望・提案希望</h2>
-
-      <div class="form-group">
-        <label for="designRequest">デザイン要望</label>
-        <p class="hint">提案したいデザインの方向性を記入（色・参考サイト・顧客要望等）</p>
-        <textarea id="designRequest" placeholder="例: ・清潔感のある青系の配色&#10;・写真を大きく使いたい&#10;・競合のA社のサイトのような雰囲気"></textarea>
-      </div>
-    </div>
-
-    <!-- スケジュール -->
-    <div class="card">
-      <h2 class="card-title">制作スケジュール</h2>
-
-      <div class="form-group">
-        <label>ガントチャート画像</label>
-        <p class="hint">ガントの対象部分スクリーンショットを添付（複数画像可能）※日付・曜日が入るように</p>
-
-        <div id="imageDropArea" class="image-upload-area">
-          <div class="icon">&#128247;</div>
-          <p>クリックまたはドラッグ&ドロップで画像をアップロード</p>
-        </div>
-        <input type="file" id="scheduleFileInput" accept="image/*" multiple style="display:none">
-
-        <div id="imagePreviewContainer" class="image-preview-container"></div>
-      </div>
-    </div>
-
-    <!-- 役務範囲 -->
-    <div class="card">
-      <h2 class="card-title">役務範囲</h2>
-
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeStructure">
-          <label for="scopeStructure">構成提案</label>
-        </div>
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeDesign">
-          <label for="scopeDesign">デザイン作成</label>
-        </div>
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeDesignProvided">
-          <label for="scopeDesignProvided">デザイン先方支給</label>
-        </div>
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeImplementation">
-          <label for="scopeImplementation">実装</label>
-        </div>
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeCopy">
-          <label for="scopeCopy">原稿作成</label>
-        </div>
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeCopyProvided">
-          <label for="scopeCopyProvided">原稿先方支給</label>
-        </div>
-        <div class="checkbox-item">
-          <input type="checkbox" id="scopeSiteCopy">
-          <label for="scopeSiteCopy">サイトコピー</label>
+    <!-- ===== Left Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">M</div>
+        <div>
+          <div class="sidebar-brand-text">MTG Doc AI</div>
+          <div class="sidebar-brand-sub">制作MTG資料 自動生成</div>
         </div>
       </div>
-    </div>
 
-    <!-- 操作ボタン -->
-    <div class="btn-group">
-      <button class="btn btn-secondary" onclick="generatePreview()">
-        プレビュー生成
-      </button>
-      <button class="btn btn-primary" onclick="submitForm()">
-        スライド生成
-      </button>
-    </div>
+      <nav class="nav-section">
+        <div class="nav-section-title">入力セクション</div>
+        <a class="nav-item active" href="#section-basic" onclick="scrollToSection('section-basic')">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          基本情報
+          <span id="navDotBasic" class="nav-dot pending"></span>
+        </a>
+        <a class="nav-item" href="#section-purpose" onclick="scrollToSection('section-purpose')">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          目的・課題
+          <span id="navDotPurpose" class="nav-dot pending"></span>
+        </a>
+        <a class="nav-item" href="#section-design" onclick="scrollToSection('section-design')">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 2l7.586 7.586" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="2"/></svg>
+          </span>
+          デザイン
+          <span id="navDotDesign" class="nav-dot pending"></span>
+        </a>
+        <a class="nav-item" href="#section-schedule" onclick="scrollToSection('section-schedule')">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          スケジュール
+          <span id="navDotSchedule" class="nav-dot pending"></span>
+        </a>
+        <a class="nav-item" href="#section-scope" onclick="scrollToSection('section-scope')">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          役務範囲
+          <span id="navDotScope" class="nav-dot pending"></span>
+        </a>
+      </nav>
+    </aside>
 
-    <!-- プレビューセクション -->
-    <div id="previewSection" class="preview-section">
-      <div class="card" style="margin-top: 24px;">
-        <h2 class="card-title">生成プレビュー</h2>
+    <!-- ===== Main Column ===== -->
+    <main class="main-column">
 
-        <div class="preview-item">
-          <h4>制作目的</h4>
-          <pre id="previewPurpose"></pre>
-        </div>
-
-        <div class="preview-item">
-          <h4>既存サイトの課題</h4>
-          <pre id="previewChallenges"></pre>
-        </div>
-
-        <div class="preview-item">
-          <h4>デザイン要望・提案</h4>
-          <pre id="previewDesign"></pre>
-        </div>
-
-        <div class="preview-item">
-          <h4>デザイン参考サイト</h4>
-          <pre id="previewReferences"></pre>
-        </div>
-
-        <div class="preview-item">
-          <h4>制作スケジュール</h4>
-          <pre id="previewSchedule"></pre>
-        </div>
-
-        <div class="preview-item">
-          <h4>役務範囲</h4>
-          <pre id="previewScope"></pre>
-        </div>
-
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="submitForm()">
-            この内容でスライドを生成
+      <!-- Hero Card -->
+      <div class="hero-card">
+        <h1>制作MTG資料 自動生成</h1>
+        <p>入力情報をもとにAIがプロフェッショナルな制作MTG資料を自動生成します</p>
+        <div class="hero-actions">
+          <button class="btn-glass" onclick="generatePreview()">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>
+            プレビュー生成
+          </button>
+          <button class="btn-glass" onclick="submitForm()">
+            <svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8"/></svg>
+            スライド生成
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- 結果セクション -->
-    <div id="resultSection" class="result-section" style="margin-top: 24px;"></div>
+      <!-- 基本情報 -->
+      <div class="card" id="section-basic">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon orange">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            基本情報
+          </h2>
+          <span class="card-badge required">必須</span>
+        </div>
+
+        <div class="form-group">
+          <label for="customerName">顧客名</label>
+          <input type="text" id="customerName" placeholder="例: 株式会社○○" oninput="updateNavDots()">
+        </div>
+
+        <div class="form-group">
+          <label for="accountId">アカウントID</label>
+          <input type="text" id="accountId" placeholder="例: ACC-12345">
+        </div>
+
+        <div class="form-group">
+          <label for="productionContent">制作内容</label>
+          <input type="text" id="productionContent" placeholder="例: コーポレートサイトリニューアル" oninput="updateNavDots()">
+        </div>
+      </div>
+
+      <!-- 制作目的・課題 -->
+      <div class="card" id="section-purpose">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon blue">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            制作目的・課題
+          </h2>
+          <span class="card-badge">AIが整形</span>
+        </div>
+
+        <div class="form-group">
+          <label for="purpose">制作目的</label>
+          <p class="hint">顧客の要望・目的（デザイン・数値・更新性等）など制作を受注した理由を記載</p>
+          <textarea id="purpose" placeholder="例: 現サイトのデザインが古く、スマホ対応もできていないためリニューアルしたい。問い合わせ数を増やしたい。" oninput="updateNavDots()"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="challenges">既存サイトの課題</label>
+          <p class="hint">構成・数値・デザイン・更新性の課題等</p>
+          <textarea id="challenges" placeholder="例: ・直帰率が70%を超えている&#10;・モバイル対応していない&#10;・更新にHTMLの知識が必要" oninput="updateNavDots()"></textarea>
+        </div>
+      </div>
+
+      <!-- デザイン要望 -->
+      <div class="card" id="section-design">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon purple">
+              <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 2l7.586 7.586" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="2"/></svg>
+            </span>
+            デザイン要望・提案希望
+          </h2>
+          <span class="card-badge">参考サイト自動提案</span>
+        </div>
+
+        <div class="form-group">
+          <label for="designRequest">デザインの方向性</label>
+          <p class="hint">提案したいデザインの方向性を記入（色・参考サイト・顧客要望等）</p>
+          <textarea id="designRequest" placeholder="例: ・清潔感のある青系の配色&#10;・写真を大きく使いたい&#10;・競合のA社のサイトのような雰囲気" oninput="updateNavDots()"></textarea>
+        </div>
+      </div>
+
+      <!-- スケジュール -->
+      <div class="card" id="section-schedule">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon green">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+            制作スケジュール
+          </h2>
+          <span class="card-badge">画像からAI読取</span>
+        </div>
+
+        <div class="form-group">
+          <label>ガントチャート画像</label>
+          <p class="hint">ガントの対象部分スクリーンショットを添付（複数画像可能）※日付・曜日が入るように</p>
+
+          <div id="imageDropArea" class="image-upload-area">
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <p class="upload-label">クリックまたはドラッグ&ドロップ</p>
+            <p>PNG, JPG, WEBP 対応</p>
+          </div>
+          <input type="file" id="scheduleFileInput" accept="image/*" multiple style="display:none">
+
+          <div id="imagePreviewContainer" class="image-preview-container"></div>
+        </div>
+      </div>
+
+      <!-- 役務範囲 -->
+      <div class="card" id="section-scope">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon rose">
+              <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </span>
+            役務範囲
+          </h2>
+        </div>
+
+        <div class="scope-grid">
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeStructure" onchange="updateNavDots()">
+            <label for="scopeStructure">構成提案</label>
+          </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeDesign" onchange="updateNavDots()">
+            <label for="scopeDesign">デザイン作成</label>
+          </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeDesignProvided" onchange="updateNavDots()">
+            <label for="scopeDesignProvided">デザイン先方支給</label>
+          </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeImplementation" onchange="updateNavDots()">
+            <label for="scopeImplementation">実装</label>
+          </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeCopy" onchange="updateNavDots()">
+            <label for="scopeCopy">原稿作成</label>
+          </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeCopyProvided" onchange="updateNavDots()">
+            <label for="scopeCopyProvided">原稿先方支給</label>
+          </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeSiteCopy" onchange="updateNavDots()">
+            <label for="scopeSiteCopy">サイトコピー</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作ボタン -->
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="generatePreview()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>
+          プレビュー
+        </button>
+        <button class="btn btn-primary" onclick="submitForm()">
+          <svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8"/></svg>
+          スライドを生成
+        </button>
+      </div>
+
+      <!-- プレビューセクション -->
+      <div id="previewSection" class="preview-section">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="card-title-icon green">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+              生成プレビュー
+            </h2>
+            <span class="card-badge">AI生成結果</span>
+          </div>
+
+          <div class="preview-item">
+            <h4>制作目的</h4>
+            <pre id="previewPurpose"></pre>
+          </div>
+
+          <div class="preview-item">
+            <h4>既存サイトの課題</h4>
+            <pre id="previewChallenges"></pre>
+          </div>
+
+          <div class="preview-item">
+            <h4>デザイン要望・提案</h4>
+            <pre id="previewDesign"></pre>
+          </div>
+
+          <div class="preview-item">
+            <h4>デザイン参考サイト</h4>
+            <pre id="previewReferences"></pre>
+          </div>
+
+          <div class="preview-item">
+            <h4>制作スケジュール</h4>
+            <pre id="previewSchedule"></pre>
+          </div>
+
+          <div class="preview-item">
+            <h4>役務範囲</h4>
+            <pre id="previewScope"></pre>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="submitForm()">
+              <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              この内容でスライドを生成
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 結果セクション -->
+      <div id="resultSection" class="result-section"></div>
+    </main>
+
+    <!-- ===== Right Panel ===== -->
+    <aside class="right-panel">
+
+      <!-- 入力ステータス -->
+      <div class="status-card">
+        <div class="status-card-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          入力ステータス
+        </div>
+        <div class="status-item">
+          <span id="statusDotCustomer" class="status-dot empty"></span>
+          <span class="status-label">顧客名</span>
+          <span id="statusValueCustomer" class="status-value">未入力</span>
+        </div>
+        <div class="status-item">
+          <span id="statusDotContent" class="status-dot empty"></span>
+          <span class="status-label">制作内容</span>
+          <span id="statusValueContent" class="status-value">未入力</span>
+        </div>
+        <div class="status-item">
+          <span id="statusDotPurpose" class="status-dot empty"></span>
+          <span class="status-label">制作目的</span>
+          <span id="statusValuePurpose" class="status-value">未入力</span>
+        </div>
+        <div class="status-item">
+          <span id="statusDotChallenges" class="status-dot empty"></span>
+          <span class="status-label">課題</span>
+          <span id="statusValueChallenges" class="status-value">未入力</span>
+        </div>
+        <div class="status-item">
+          <span id="statusDotDesign" class="status-dot empty"></span>
+          <span class="status-label">デザイン要望</span>
+          <span id="statusValueDesign" class="status-value">未入力</span>
+        </div>
+        <div class="status-item">
+          <span id="statusDotSchedule" class="status-dot empty"></span>
+          <span class="status-label">スケジュール</span>
+          <span id="statusValueSchedule" class="status-value">未添付</span>
+        </div>
+        <div class="status-item">
+          <span id="statusDotScope" class="status-dot empty"></span>
+          <span class="status-label">役務範囲</span>
+          <span id="statusValueScope" class="status-value">未選択</span>
+        </div>
+      </div>
+
+      <!-- AI処理の説明 -->
+      <div class="status-card">
+        <div class="status-card-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          AIによる自動処理
+        </div>
+        <div class="status-item">
+          <span class="status-dot" style="background: var(--accent);"></span>
+          <span class="status-label">メモからビジネス文書を生成</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot" style="background: var(--accent);"></span>
+          <span class="status-label">参考デザインサイトを提案</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot" style="background: var(--accent);"></span>
+          <span class="status-label">ガントチャートをテキスト化</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot" style="background: var(--accent);"></span>
+          <span class="status-label">不要スライドの自動削除</span>
+        </div>
+      </div>
+
+    </aside>
+
   </div>
 
   <?!= include('JavaScript'); ?>

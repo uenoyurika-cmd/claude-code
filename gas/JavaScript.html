@@ -3,16 +3,23 @@
   let scheduleImages = [];
 
   /**
+   * 初期化
+   */
+  function init() {
+    initImageUpload();
+    updateNavDots();
+    updateStatusPanel();
+  }
+
+  /**
    * 画像アップロードエリアの初期化
    */
   function initImageUpload() {
     const dropArea = document.getElementById('imageDropArea');
     const fileInput = document.getElementById('scheduleFileInput');
 
-    // クリックでファイル選択
     dropArea.addEventListener('click', () => fileInput.click());
 
-    // ドラッグ&ドロップ
     dropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropArea.classList.add('dragover');
@@ -28,9 +35,23 @@
       handleFiles(e.dataTransfer.files);
     });
 
-    // ファイル選択
     fileInput.addEventListener('change', (e) => {
       handleFiles(e.target.files);
+    });
+
+    // テキストフィールドの入力監視
+    const fields = ['customerName', 'accountId', 'productionContent', 'purpose', 'challenges', 'designRequest'];
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updateStatusPanel);
+      }
+    });
+
+    // チェックボックスの変更監視
+    const checkboxes = document.querySelectorAll('.scope-tag input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', updateStatusPanel);
     });
   }
 
@@ -45,6 +66,8 @@
       reader.onload = (e) => {
         scheduleImages.push(e.target.result);
         renderImagePreviews();
+        updateNavDots();
+        updateStatusPanel();
       };
       reader.readAsDataURL(file);
     }
@@ -74,6 +97,96 @@
   function removeImage(index) {
     scheduleImages.splice(index, 1);
     renderImagePreviews();
+    updateNavDots();
+    updateStatusPanel();
+  }
+
+  /**
+   * セクションへスクロール
+   */
+  function scrollToSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ナビアイテムのアクティブ状態を更新
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    const clickedItem = document.querySelector(`a[href="#${sectionId}"]`);
+    if (clickedItem) clickedItem.classList.add('active');
+  }
+
+  /**
+   * サイドバーのナビゲーションドットを更新
+   */
+  function updateNavDots() {
+    const hasBasic = document.getElementById('customerName').value.trim() &&
+                     document.getElementById('productionContent').value.trim();
+    const hasPurpose = document.getElementById('purpose').value.trim() ||
+                       document.getElementById('challenges').value.trim();
+    const hasDesign = document.getElementById('designRequest').value.trim();
+    const hasSchedule = scheduleImages.length > 0;
+    const hasScope = document.querySelectorAll('.scope-tag input:checked').length > 0;
+
+    setNavDot('navDotBasic', hasBasic ? 'done' : 'pending');
+    setNavDot('navDotPurpose', hasPurpose ? 'done' : 'pending');
+    setNavDot('navDotDesign', hasDesign ? 'done' : 'pending');
+    setNavDot('navDotSchedule', hasSchedule ? 'done' : 'pending');
+    setNavDot('navDotScope', hasScope ? 'done' : 'pending');
+  }
+
+  function setNavDot(id, state) {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    dot.className = 'nav-dot ' + state;
+  }
+
+  /**
+   * 右パネルのステータスを更新
+   */
+  function updateStatusPanel() {
+    updateStatusItem('Customer', document.getElementById('customerName').value.trim());
+    updateStatusItem('Content', document.getElementById('productionContent').value.trim());
+    updateStatusItem('Purpose', document.getElementById('purpose').value.trim());
+    updateStatusItem('Challenges', document.getElementById('challenges').value.trim());
+    updateStatusItem('Design', document.getElementById('designRequest').value.trim());
+
+    // スケジュール
+    const schedDot = document.getElementById('statusDotSchedule');
+    const schedVal = document.getElementById('statusValueSchedule');
+    if (scheduleImages.length > 0) {
+      schedDot.className = 'status-dot filled';
+      schedVal.textContent = scheduleImages.length + '枚';
+    } else {
+      schedDot.className = 'status-dot empty';
+      schedVal.textContent = '未添付';
+    }
+
+    // 役務範囲
+    const scopeChecked = document.querySelectorAll('.scope-tag input:checked').length;
+    const scopeDot = document.getElementById('statusDotScope');
+    const scopeVal = document.getElementById('statusValueScope');
+    if (scopeChecked > 0) {
+      scopeDot.className = 'status-dot filled';
+      scopeVal.textContent = scopeChecked + '項目';
+    } else {
+      scopeDot.className = 'status-dot empty';
+      scopeVal.textContent = '未選択';
+    }
+  }
+
+  function updateStatusItem(name, value) {
+    const dot = document.getElementById('statusDot' + name);
+    const val = document.getElementById('statusValue' + name);
+    if (!dot || !val) return;
+
+    if (value) {
+      dot.className = 'status-dot filled';
+      val.textContent = value.length > 8 ? value.substring(0, 8) + '...' : value;
+    } else {
+      dot.className = 'status-dot empty';
+      val.textContent = '未入力';
+    }
   }
 
   /**
@@ -104,16 +217,70 @@
    * バリデーション
    */
   function validateForm() {
-    const required = ['customerName', 'productionContent'];
-    for (const id of required) {
-      const el = document.getElementById(id);
+    const checks = [
+      { id: 'customerName', label: '顧客名' },
+      { id: 'productionContent', label: '制作内容' },
+    ];
+    for (const check of checks) {
+      const el = document.getElementById(check.id);
       if (!el.value.trim()) {
         el.focus();
-        alert(el.previousElementSibling.textContent + 'を入力してください。');
+        el.style.borderColor = '#EF4444';
+        el.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+        setTimeout(() => {
+          el.style.borderColor = '';
+          el.style.boxShadow = '';
+        }, 3000);
+        showToast(check.label + 'を入力してください', 'error');
         return false;
       }
     }
     return true;
+  }
+
+  /**
+   * トースト通知
+   */
+  function showToast(message, type) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 2000;
+      animation: toastIn 0.3s ease;
+      font-family: inherit;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      ${type === 'error'
+        ? 'background: #FEF2F2; color: #EF4444; border: 1px solid rgba(239,68,68,0.2);'
+        : 'background: #ECFDF5; color: #10B981; border: 1px solid rgba(16,185,129,0.2);'}
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // アニメーション用style
+    if (!document.getElementById('toastStyle')) {
+      const style = document.createElement('style');
+      style.id = 'toastStyle';
+      style.textContent = `
+        @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }
+      `;
+      document.head.appendChild(style);
+    }
+
+    setTimeout(() => {
+      toast.style.animation = 'toastOut 0.3s ease forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   }
 
   /**
@@ -123,7 +290,7 @@
     if (!validateForm()) return;
 
     const formData = collectFormData();
-    showLoading('AIでテキストを生成中...');
+    showLoading('AIでテキストを生成しています', 'メモ内容をプロフェッショナルなビジネス文書に整形中...');
 
     google.script.run
       .withSuccessHandler(handlePreviewSuccess)
@@ -153,8 +320,8 @@
     document.getElementById('previewSchedule').textContent = preview.scheduleText || '（画像未添付）';
     document.getElementById('previewScope').textContent = preview.scopeText;
 
-    // プレビューセクションまでスクロール
     section.scrollIntoView({ behavior: 'smooth' });
+    showToast('プレビューを生成しました', 'success');
   }
 
   /**
@@ -162,11 +329,28 @@
    */
   function submitForm() {
     if (!validateForm()) return;
+    showConfirm();
+  }
 
-    if (!confirm('スライドを生成しますか？')) return;
+  /**
+   * 確認ダイアログ表示
+   */
+  function showConfirm() {
+    document.getElementById('confirmOverlay').classList.add('active');
+  }
+
+  function hideConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('active');
+  }
+
+  /**
+   * 確認後にスライド生成を実行
+   */
+  function confirmSubmit() {
+    hideConfirm();
 
     const formData = collectFormData();
-    showLoading('制作MTG資料を生成中...\nClaude AIによるテキスト生成とスライド作成を行っています。');
+    showLoading('制作MTG資料を生成中', 'Claude AIによるテキスト生成とGoogle Slides資料の作成を行っています');
 
     google.script.run
       .withSuccessHandler(handleSubmitSuccess)
@@ -185,15 +369,21 @@
 
     if (result.success) {
       resultSection.innerHTML = `
-        <div class="result-success">
-          <h3>資料が生成されました</h3>
-          <p style="margin-top: 12px;">
+        <div class="card">
+          <div class="result-success">
+            <svg viewBox="0 0 24 24" width="48" height="48" stroke="#10B981" fill="none" stroke-width="1.5" style="margin-bottom: 12px;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>資料の生成が完了しました</h3>
             <a href="${result.slideUrl}" target="_blank">
-              Google Slides で開く →
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Google Slides で開く
             </a>
-          </p>
+          </div>
         </div>
       `;
+      showToast('スライドが生成されました', 'success');
     } else {
       showError(result.error);
     }
@@ -216,9 +406,11 @@
     const resultSection = document.getElementById('resultSection');
     resultSection.classList.add('active');
     resultSection.innerHTML = `
-      <div class="result-error">
-        <strong>エラーが発生しました</strong>
-        <p style="margin-top: 8px;">${message}</p>
+      <div class="card">
+        <div class="result-error">
+          <strong>エラーが発生しました</strong>
+          <p style="margin-top: 8px;">${message}</p>
+        </div>
       </div>
     `;
     resultSection.scrollIntoView({ behavior: 'smooth' });
@@ -227,9 +419,12 @@
   /**
    * ローディング表示
    */
-  function showLoading(message) {
+  function showLoading(title, message) {
     const overlay = document.getElementById('loadingOverlay');
-    document.getElementById('loadingText').textContent = message;
+    const titleEl = overlay.querySelector('.loading-title');
+    const textEl = document.getElementById('loadingText');
+    if (titleEl) titleEl.textContent = title;
+    if (textEl) textEl.textContent = message;
     overlay.classList.add('active');
   }
 
@@ -241,5 +436,5 @@
   }
 
   // ページ読み込み時に初期化
-  document.addEventListener('DOMContentLoaded', initImageUpload);
+  document.addEventListener('DOMContentLoaded', init);
 </script>
