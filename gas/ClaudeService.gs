@@ -1,56 +1,61 @@
 /**
- * Claude API連携サービス
+ * Gemini API連携サービス
  *
- * Claude APIを使用してテキスト生成・画像解析を行う。
+ * Gemini APIを使用してテキスト生成・画像解析を行う。
  */
 
-const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
-
 /**
- * Claude APIにリクエストを送信する
- * @param {Array} messages - メッセージ配列
+ * Gemini APIにリクエストを送信する
+ * @param {string} userMessage - ユーザーメッセージ
  * @param {string} systemPrompt - システムプロンプト
  * @returns {string} レスポンステキスト
  */
-function callClaudeApi(messages, systemPrompt) {
-  const apiKey = getClaudeApiKey();
+function callGeminiApi(userMessage, systemPrompt) {
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
-    throw new Error('Claude APIキーが設定されていません。スクリプトプロパティに CLAUDE_API_KEY を設定してください。');
+    throw new Error('Gemini APIキーが設定されていません。スクリプトプロパティに GEMINI_API_KEY を設定してください。');
   }
 
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + CONFIG.GEMINI_MODEL + ':generateContent?key=' + apiKey;
+
   const payload = {
-    model: CONFIG.CLAUDE_MODEL,
-    max_tokens: CONFIG.CLAUDE_MAX_TOKENS,
-    system: systemPrompt,
-    messages: messages,
+    system_instruction: {
+      parts: [{ text: systemPrompt }],
+    },
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: userMessage }],
+      },
+    ],
+    generationConfig: {
+      maxOutputTokens: CONFIG.GEMINI_MAX_TOKENS,
+      temperature: 0.7,
+    },
   };
 
   const options = {
     method: 'post',
     contentType: 'application/json',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
     payload: JSON.stringify(payload),
     muteHttpExceptions: true,
   };
 
-  const response = UrlFetchApp.fetch(CLAUDE_API_URL, options);
+  const response = UrlFetchApp.fetch(url, options);
   const responseCode = response.getResponseCode();
 
   if (responseCode !== 200) {
     const errorBody = response.getContentText();
-    Logger.log('Claude API Error: ' + responseCode + ' - ' + errorBody);
-    throw new Error('Claude API エラー (HTTP ' + responseCode + '): ' + errorBody);
+    Logger.log('Gemini API Error: ' + responseCode + ' - ' + errorBody);
+    throw new Error('Gemini API エラー (HTTP ' + responseCode + '): ' + errorBody);
   }
 
   const result = JSON.parse(response.getContentText());
-  return result.content[0].text;
+  return result.candidates[0].content.parts[0].text;
 }
 
 /**
- * フォームデータからClaude APIを使ってテキストを生成する
+ * フォームデータからGemini APIを使ってテキストを生成する
  * @param {Object} formData - フォームデータ
  * @returns {Object} 生成テキスト群
  */
@@ -92,16 +97,12 @@ ${formData.designRequest || '未入力'}
 デザイン参考サイトは、入力されたデザイン要望に合いそうな実在の参考サイトを2〜3件提案してください。
 JSON形式で出力してください。`;
 
-  const messages = [
-    { role: 'user', content: userMessage },
-  ];
-
-  const responseText = callClaudeApi(messages, systemPrompt);
+  const responseText = callGeminiApi(userMessage, systemPrompt);
 
   // JSONを抽出してパース
   const jsonMatch = responseText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new Error('Claude APIの応答からJSONを抽出できませんでした');
+    throw new Error('Gemini APIの応答からJSONを抽出できませんでした');
   }
 
   return JSON.parse(jsonMatch[0]);
@@ -113,9 +114,9 @@ JSON形式で出力してください。`;
  * @returns {string} 抽出されたスケジュールテキスト
  */
 function extractScheduleFromImages(base64Images) {
-  const apiKey = getClaudeApiKey();
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
-    throw new Error('Claude APIキーが設定されていません。');
+    throw new Error('Gemini APIキーが設定されていません。');
   }
 
   const systemPrompt = `あなたはプロジェクトスケジュールの読み取り専門家です。
@@ -135,48 +136,49 @@ function extractScheduleFromImages(base64Images) {
 公開: 2026/04/05`;
 
   // 画像コンテンツを構築
-  const contentParts = [];
+  const parts = [];
   for (const img of base64Images) {
-    // data:image/png;base64,xxxxx の形式から分離
     const matches = img.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
     if (matches) {
-      contentParts.push({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: matches[1],
+      parts.push({
+        inline_data: {
+          mime_type: matches[1],
           data: matches[2],
         },
       });
     }
   }
 
-  contentParts.push({
-    type: 'text',
+  parts.push({
     text: 'この画像はプロジェクトのガントチャート/スケジュール表です。画像に記載されているスケジュール情報を正確にテキスト化してください。日付・曜日・工程名をすべて読み取ってください。',
   });
 
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + CONFIG.GEMINI_MODEL + ':generateContent?key=' + apiKey;
+
   const payload = {
-    model: CONFIG.CLAUDE_MODEL,
-    max_tokens: CONFIG.CLAUDE_MAX_TOKENS,
-    system: systemPrompt,
-    messages: [
-      { role: 'user', content: contentParts },
+    system_instruction: {
+      parts: [{ text: systemPrompt }],
+    },
+    contents: [
+      {
+        role: 'user',
+        parts: parts,
+      },
     ],
+    generationConfig: {
+      maxOutputTokens: CONFIG.GEMINI_MAX_TOKENS,
+      temperature: 0.3,
+    },
   };
 
   const options = {
     method: 'post',
     contentType: 'application/json',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
     payload: JSON.stringify(payload),
     muteHttpExceptions: true,
   };
 
-  const response = UrlFetchApp.fetch(CLAUDE_API_URL, options);
+  const response = UrlFetchApp.fetch(url, options);
   const responseCode = response.getResponseCode();
 
   if (responseCode !== 200) {
@@ -184,5 +186,5 @@ function extractScheduleFromImages(base64Images) {
   }
 
   const result = JSON.parse(response.getContentText());
-  return result.content[0].text;
+  return result.candidates[0].content.parts[0].text;
 }

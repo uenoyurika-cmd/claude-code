@@ -8,25 +8,23 @@ const CONFIG = {
   // 生成したスライドの出力先フォルダID（空の場合はマイドライブ直下）
   OUTPUT_FOLDER_ID: '',
 
-  // Claude API設定
-  CLAUDE_API_KEY: PropertiesService.getScriptProperties().getProperty('CLAUDE_API_KEY') || '',
-  CLAUDE_MODEL: 'claude-sonnet-4-20250514',
-  CLAUDE_MAX_TOKENS: 4096,
+  // Gemini API設定
+  GEMINI_MODEL: 'gemini-2.0-flash',
+  GEMINI_MAX_TOKENS: 4096,
 };
 
 /**
  * スクリプトプロパティからAPIキーを取得
  */
-function getClaudeApiKey() {
-  return PropertiesService.getScriptProperties().getProperty('CLAUDE_API_KEY');
+function getGeminiApiKey() {
+  return PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
 }
 
 /**
  * スクリプトプロパティにAPIキーを設定（初回セットアップ用）
- * GASエディタのスクリプトプロパティから設定するか、この関数を1回実行する
  */
-function setClaudeApiKey(apiKey) {
-  PropertiesService.getScriptProperties().setProperty('CLAUDE_API_KEY', apiKey);
+function setGeminiApiKey(apiKey) {
+  PropertiesService.getScriptProperties().setProperty('GEMINI_API_KEY', apiKey);
 }
 
 /**
