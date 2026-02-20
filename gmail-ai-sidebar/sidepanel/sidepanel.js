@@ -3,7 +3,7 @@
    Gemini API 版
    ============================================ */
 
-const SYSTEM_PROMPT = `あなたはプロのWEBディレクターとして振る舞い、ユーザーが書いた文章を最適で丁寧なビジネスメール文に直す役割を担います。
+const BASE_SYSTEM_PROMPT = `あなたはプロのWEBディレクターとして振る舞い、ユーザーが書いた文章を最適で丁寧なビジネスメール文に直す役割を担います。
 
 ## ルール
 - メールの目的に合わせて、相手に配慮しながらも伝えるべき内容は的確に伝える
@@ -16,10 +16,23 @@ const SYSTEM_PROMPT = `あなたはプロのWEBディレクターとして振る
 - メールの冒頭には適切な挨拶文を入れる
 - メールの末尾には適切な結びの言葉を入れる`;
 
+function buildSystemPrompt() {
+  let prompt = BASE_SYSTEM_PROMPT;
+  if (userName) {
+    prompt += `\n- メール末尾の署名には「${userName}」を使用する`;
+  }
+  if (greeting) {
+    prompt += `\n- メール冒頭の挨拶は「${greeting}」で始める`;
+  }
+  return prompt;
+}
+
 // ---- DOM Elements ----
 const settingsScreen = document.getElementById("settings-screen");
 const chatScreen = document.getElementById("chat-screen");
 const apiKeyInput = document.getElementById("api-key-input");
+const userNameInput = document.getElementById("user-name-input");
+const greetingSelect = document.getElementById("greeting-select");
 const modelSelect = document.getElementById("model-select");
 const saveSettingsBtn = document.getElementById("save-settings-btn");
 const toggleKeyBtn = document.getElementById("toggle-key-visibility");
@@ -30,14 +43,18 @@ const sendBtn = document.getElementById("send-btn");
 
 // ---- State ----
 let apiKey = "";
+let userName = "";
+let greeting = "お疲れ様です。";
 let model = "gemini-2.5-flash-lite";
 let isGenerating = false;
 
 // ---- Initialization ----
 async function init() {
-  const stored = await chrome.storage.local.get(["apiKey", "model"]);
+  const stored = await chrome.storage.local.get(["apiKey", "userName", "greeting", "model"]);
   if (stored.apiKey) {
     apiKey = stored.apiKey;
+    userName = stored.userName || "";
+    greeting = stored.greeting ?? "お疲れ様です。";
     model = stored.model || "gemini-2.5-flash-lite";
     showChatScreen();
   } else {
@@ -49,6 +66,8 @@ function showSettingsScreen() {
   settingsScreen.classList.remove("hidden");
   chatScreen.classList.add("hidden");
   apiKeyInput.value = apiKey;
+  userNameInput.value = userName;
+  greetingSelect.value = greeting;
   modelSelect.value = model;
 }
 
@@ -72,8 +91,10 @@ saveSettingsBtn.addEventListener("click", async () => {
   }
 
   apiKey = key;
+  userName = userNameInput.value.trim();
+  greeting = greetingSelect.value;
   model = modelSelect.value;
-  await chrome.storage.local.set({ apiKey, model });
+  await chrome.storage.local.set({ apiKey, userName, greeting, model });
   showChatScreen();
 });
 
@@ -171,7 +192,7 @@ async function streamResponse(userMessage, onChunk) {
     },
     body: JSON.stringify({
       systemInstruction: {
-        parts: [{ text: SYSTEM_PROMPT }],
+        parts: [{ text: buildSystemPrompt() }],
       },
       contents: [
         {

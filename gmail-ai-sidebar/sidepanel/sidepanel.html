@@ -38,6 +38,26 @@
           </button>
         </div>
 
+        <label class="input-label" for="user-name-input">あなたの名前</label>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="user-name-input"
+            placeholder="例: 山田 太郎"
+            autocomplete="off"
+          >
+        </div>
+
+        <label class="input-label" for="greeting-select">冒頭の挨拶</label>
+        <div class="select-wrapper">
+          <select id="greeting-select">
+            <option value="お疲れ様です。" selected>お疲れ様です。（社内向け）</option>
+            <option value="いつもお世話になっております。">いつもお世話になっております。（社外向け）</option>
+            <option value="お忙しいところ恐れ入ります。">お忙しいところ恐れ入ります。（丁寧）</option>
+            <option value="">なし（AIにおまかせ）</option>
+          </select>
+        </div>
+
         <label class="input-label" for="model-select">モデル選択</label>
         <div class="select-wrapper">
           <select id="model-select">
