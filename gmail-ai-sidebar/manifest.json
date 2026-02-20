@@ -9,7 +9,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://api.anthropic.com/*"
+    "https://generativelanguage.googleapis.com/*"
   ],
   "side_panel": {
     "default_path": "sidepanel/sidepanel.html"

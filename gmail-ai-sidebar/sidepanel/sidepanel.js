@@ -1,5 +1,6 @@
 /* ============================================
    ビジネスメール アシスタント — Side Panel Logic
+   Gemini API 版
    ============================================ */
 
 const SYSTEM_PROMPT = `あなたはプロのWEBディレクターとして振る舞い、ユーザーが書いた文章を最適で丁寧なビジネスメール文に直す役割を担います。
@@ -29,7 +30,7 @@ const sendBtn = document.getElementById("send-btn");
 
 // ---- State ----
 let apiKey = "";
-let model = "claude-haiku-4-5";
+let model = "gemini-2.5-flash-preview-05-20";
 let isGenerating = false;
 
 // ---- Initialization ----
@@ -37,7 +38,7 @@ async function init() {
   const stored = await chrome.storage.local.get(["apiKey", "model"]);
   if (stored.apiKey) {
     apiKey = stored.apiKey;
-    model = stored.model || "claude-haiku-4-5";
+    model = stored.model || "gemini-2.5-flash-preview-05-20";
     showChatScreen();
   } else {
     showSettingsScreen();
@@ -159,21 +160,29 @@ async function handleSend() {
   }
 }
 
-// ---- API Call with Streaming ----
+// ---- Gemini API Call with Streaming ----
 async function streamResponse(userMessage, onChunk) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: model,
-      max_tokens: 4096,
-      stream: true,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userMessage }],
+      systemInstruction: {
+        parts: [{ text: SYSTEM_PROMPT }],
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: userMessage }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 4096,
+        temperature: 0.7,
+      },
     }),
   });
 
@@ -202,16 +211,15 @@ async function streamResponse(userMessage, onChunk) {
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
 
-      const data = line.slice(6);
-      if (data === "[DONE]") return;
+      const data = line.slice(6).trim();
+      if (!data || data === "[DONE]") continue;
 
       try {
         const parsed = JSON.parse(data);
-        if (
-          parsed.type === "content_block_delta" &&
-          parsed.delta?.type === "text_delta"
-        ) {
-          onChunk(parsed.delta.text);
+        // Gemini のレスポンス構造: candidates[0].content.parts[0].text
+        const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          onChunk(text);
         }
       } catch {
         // JSON パースエラーは無視（不完全なチャンクの可能性）
@@ -338,14 +346,14 @@ function escapeHtml(text) {
 }
 
 function getErrorMessage(error) {
-  if (error.status === 401) {
-    return "API キーが無効です。設定画面でキーを確認してください。";
+  if (error.status === 400) {
+    return "リクエストエラー。API キーまたはモデル名を確認してください。";
+  }
+  if (error.status === 403) {
+    return "API キーが無効、またはこのモデルへのアクセス権がありません。設定を確認してください。";
   }
   if (error.status === 429) {
     return "リクエストが多すぎます。しばらく待ってからもう一度お試しください。";
-  }
-  if (error.status === 400) {
-    return "リクエストエラーが発生しました。入力内容を確認してください。";
   }
   if (error.status >= 500) {
     return "サーバーエラーが発生しました。しばらく待ってからもう一度お試しください。";
