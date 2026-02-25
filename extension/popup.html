@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="popup-body">
+  <div class="popup-container">
+    <div class="popup-header">
+      <h1>Bookmark Manager+</h1>
+      <button id="openDetached" class="btn-icon" title="別ウィンドウで開く">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 2h5v1H3v10h10V8h1v5a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm7 0h5v5h-1V3.7L8.35 8.35l-.7-.7L12.29 3H9V2z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="ブックマークを検索...">
+    </div>
+    <div id="bookmarkTree" class="bookmark-tree"></div>
+    <div class="popup-footer">
+      <button id="addBookmark" class="btn-primary">+ 現在のページを追加</button>
+    </div>
+  </div>
+  <script src="bookmarks.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

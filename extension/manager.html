@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Bookmark Manager+</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="manager-body">
+  <div class="manager-container">
+    <header class="manager-header">
+      <h1>Bookmark Manager+</h1>
+      <div class="header-actions">
+        <div class="search-bar search-bar-wide">
+          <input type="text" id="searchInput" placeholder="ブックマークを検索...">
+        </div>
+        <div class="view-toggle">
+          <button id="viewTree" class="btn-view active" title="ツリー表示">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1 2h14v1H1zm2 3h12v1H3zm2 3h10v1H5zm-2 3h12v1H3zm-2 3h14v1H1z"/>
+            </svg>
+          </button>
+          <button id="viewGrid" class="btn-view" title="グリッド表示">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="manager-layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">フォルダ</div>
+        <div id="folderTree" class="folder-tree"></div>
+        <button id="addFolder" class="btn-sidebar">+ 新しいフォルダ</button>
+      </aside>
+
+      <main class="main-content">
+        <div class="breadcrumb" id="breadcrumb"></div>
+        <div id="bookmarkTree" class="bookmark-tree"></div>
+      </main>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu hidden">
+      <button data-action="open">開く</button>
+      <button data-action="openNewTab">新しいタブで開く</button>
+      <hr>
+      <button data-action="edit">編集</button>
+      <button data-action="move">移動</button>
+      <hr>
+      <button data-action="delete">削除</button>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <h2 id="modalTitle">ブックマークを編集</h2>
+        <div class="form-group">
+          <label for="editName">名前</label>
+          <input type="text" id="editName">
+        </div>
+        <div class="form-group" id="urlGroup">
+          <label for="editUrl">URL</label>
+          <input type="text" id="editUrl">
+        </div>
+        <div class="form-group" id="parentGroup">
+          <label for="editParent">移動先フォルダ</label>
+          <select id="editParent"></select>
+        </div>
+        <div class="modal-actions">
+          <button id="modalCancel" class="btn-secondary">キャンセル</button>
+          <button id="modalSave" class="btn-primary">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="bookmarks.js"></script>
+  <script src="manager.js"></script>
+</body>
+</html>
