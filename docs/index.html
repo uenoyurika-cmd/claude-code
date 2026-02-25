@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTG Doc AI - 制作MTG資料 自動生成ツール</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FF7E47'/><text x='50' y='68' font-size='55' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>M</text></svg>">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #FF7E47;
+      --accent-light: #FFF0EA;
+      --accent-dark: #E56A33;
+      --text: #1a1a2e;
+      --text-sub: #64648c;
+      --bg: #fafafa;
+      --white: #ffffff;
+      --border: #e8e8f0;
+      --blue: #4F8CFF;
+      --green: #10B981;
+      --purple: #8B5CF6;
+      --rose: #F43F5E;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Header ===== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow 0.3s;
+    }
+    header.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .logo-text { font-weight: 700; font-size: 16px; letter-spacing: -0.02em; }
+
+    .header-nav { display: flex; gap: 32px; align-items: center; }
+    .header-nav a {
+      text-decoration: none;
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: var(--text); }
+
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(255,126,71,0.25);
+    }
+    .btn-cta:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255,126,71,0.3);
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      padding: 140px 24px 80px;
+      text-align: center;
+      background: linear-gradient(180deg, #fff 0%, var(--bg) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,126,71,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(79,140,255,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      margin-bottom: 20px;
+    }
+    .hero h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text-sub);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.8;
+    }
+
+    .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: var(--white);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ===== Mockup ===== */
+    .mockup-section {
+      max-width: 960px;
+      margin: -20px auto 60px;
+      padding: 0 24px;
+    }
+    .mockup-frame {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .mockup-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #f7f7fa;
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .mockup-dot.red { background: #FF5F57; }
+    .mockup-dot.yellow { background: #FEBC2E; }
+    .mockup-dot.green { background: #28C840; }
+    .mockup-titlebar-text {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .mockup-body {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      min-height: 320px;
+    }
+    .mockup-sidebar {
+      background: #f7f7fa;
+      border-radius: 12px;
+      padding: 20px 16px;
+    }
+    .mockup-sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .mockup-sidebar-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .mockup-sidebar-text { font-size: 12px; font-weight: 700; }
+    .mockup-nav-item {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+    .mockup-nav-item.active {
+      background: var(--white);
+      color: var(--text);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .mockup-main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .mockup-card {
+      background: #f7f7fa;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .mockup-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mockup-card-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .mockup-field {
+      height: 32px;
+      background: var(--white);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .mockup-field.short { width: 60%; }
+    .mockup-textarea {
+      height: 56px;
+      background: var(--white);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* ===== Section ===== */
+    section {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(24px, 3.5vw, 36px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .section-sub {
+      font-size: 15px;
+      color: var(--text-sub);
+      max-width: 560px;
+      margin-bottom: 48px;
+    }
+
+    /* ===== Features ===== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+      border-color: transparent;
+    }
+    .feature-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .feature-icon svg { width: 22px; height: 22px; stroke-width: 1.5; fill: none; }
+    .feature-icon.orange { background: var(--accent-light); }
+    .feature-icon.orange svg { stroke: var(--accent); }
+    .feature-icon.blue { background: #EBF2FF; }
+    .feature-icon.blue svg { stroke: var(--blue); }
+    .feature-icon.green { background: #ECFDF5; }
+    .feature-icon.green svg { stroke: var(--green); }
+    .feature-icon.purple { background: #F3EEFF; }
+    .feature-icon.purple svg { stroke: var(--purple); }
+    .feature-icon.rose { background: #FFF1F2; }
+    .feature-icon.rose svg { stroke: var(--rose); }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    /* ===== Flow ===== */
+    .flow-section { background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .flow-section > div { max-width: 1120px; margin: 0 auto; padding: 80px 24px; }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      counter-reset: step;
+    }
+    .flow-step {
+      text-align: center;
+      position: relative;
+      counter-increment: step;
+    }
+    .flow-step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .flow-step-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .flow-step-desc {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+    .flow-step-arrow {
+      position: absolute;
+      top: 24px;
+      right: -12px;
+      color: #d0d0d8;
+      font-size: 20px;
+    }
+
+    /* ===== Before After ===== */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .compare-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+    .compare-card.before { border-color: #e0e0e8; }
+    .compare-card.after { border-color: var(--accent); box-shadow: 0 4px 20px rgba(255,126,71,0.1); }
+    .compare-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .compare-card.before .compare-label { background: #f0f0f4; color: var(--text-sub); }
+    .compare-card.after .compare-label { background: var(--accent-light); color: var(--accent); }
+    .compare-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .compare-item + .compare-item { border-top: 1px solid #f0f0f4; }
+    .compare-icon { flex-shrink: 0; margin-top: 2px; }
+    .compare-arrow {
+      font-size: 32px;
+      color: var(--accent);
+      font-weight: 300;
+    }
+
+    /* ===== Stats ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 28px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    /* ===== Tech ===== */
+    .tech-grid {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .tech-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .tech-tag-icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: white;
+    }
+
+    /* ===== CTA ===== */
+    .cta-section {
+      text-align: center;
+      padding: 80px 24px 100px;
+    }
+    .cta-card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, var(--accent) 0%, #FF9B6A 100%);
+      border-radius: 24px;
+      padding: 56px 40px;
+      color: white;
+    }
+    .cta-card h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .cta-card p {
+      font-size: 15px;
+      opacity: 0.9;
+      margin-bottom: 32px;
+    }
+    .btn-white {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: white;
+      color: var(--accent);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-copy {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .header-nav { display: none; }
+      .mockup-body { grid-template-columns: 1fr; }
+      .mockup-sidebar { display: none; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .compare-arrow { transform: rotate(90deg); text-align: center; }
+      .flow-step-arrow { display: none; }
+    }
+
+    /* ===== Animations ===== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="header">
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">M</div>
+        <span class="logo-text">MTG Doc AI</span>
+      </a>
+      <nav class="header-nav">
+        <a href="#features">機能</a>
+        <a href="#flow">使い方</a>
+        <a href="#compare">導入効果</a>
+        <a href="#tech">技術構成</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      ferret One 社内ツール
+    </div>
+    <h1>制作MTG資料を<br><span>AIで自動生成</span></h1>
+    <p class="hero-sub">
+      フォームに情報を入力するだけで、AIがプロフェッショナルな制作MTG資料を<br>Google Slidesに自動生成します
+    </p>
+    <div class="hero-actions">
+      <a href="#features" class="btn-cta">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>
+        機能を見る
+      </a>
+      <a href="#flow" class="btn-outline">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        使い方
+      </a>
+    </div>
+  </section>
+
+  <!-- Mockup -->
+  <div class="mockup-section fade-up">
+    <div class="mockup-frame">
+      <div class="mockup-titlebar">
+        <div class="mockup-dot red"></div>
+        <div class="mockup-dot yellow"></div>
+        <div class="mockup-dot green"></div>
+        <span class="mockup-titlebar-text">制作MTG資料 自動生成ツール</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-sidebar">
+          <div class="mockup-sidebar-brand">
+            <div class="mockup-sidebar-icon">M</div>
+            <span class="mockup-sidebar-text">MTG Doc AI</span>
+          </div>
+          <div class="mockup-nav-item active">基本情報</div>
+          <div class="mockup-nav-item">目的・課題</div>
+          <div class="mockup-nav-item">デザイン</div>
+          <div class="mockup-nav-item">スケジュール</div>
+          <div class="mockup-nav-item">役務範囲</div>
+        </div>
+        <div class="mockup-main">
+          <div class="mockup-card">
+            <div class="mockup-card-title">
+              <div class="mockup-card-dot" style="background:var(--accent)"></div>
+              基本情報
+            </div>
+            <div class="mockup-field short"></div>
+            <div class="mockup-field short"></div>
+            <div class="mockup-field"></div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-title">
+              <div class="mockup-card-dot" style="background:var(--blue)"></div>
+              制作目的・課題
+            </div>
+            <div class="mockup-textarea"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section id="features" class="fade-up">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">AI が資料作成を自動化</h2>
+    <p class="section-sub">入力されたメモ書きや画像から、AIが適切なビジネス文書を自動生成。テンプレートに反映して完成度の高い資料を即座に作成します。</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon orange">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-title">メモからビジネス文書を生成</div>
+        <div class="feature-desc">箇条書きのメモや走り書きを入力するだけで、AIが制作目的・顧客課題・目標を整った文章に変換します。</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon purple">
+          <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-title">デザイン参考画像のAI解析</div>
+        <div class="feature-desc">アップロードされた参考画像をAIが分析し、配色・レイアウト・雰囲気・訴求ポイントを自動で言語化してスライドに記載します。</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="feature-title">ガントチャート画像の読み取り</div>
+        <div class="feature-desc">スケジュールのスクリーンショットからAIが工程名・日付・期間を自動抽出。手入力の手間をゼロにします。</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon blue">
+          <svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="feature-title">Google Slides自動生成</div>
+        <div class="feature-desc">テンプレートを自動複製し、全プレースホルダーにAI生成テキストを埋め込み。編集可能なスライドとして出力します。</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon rose">
+          <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="feature-title">役務範囲に応じたページ制御</div>
+        <div class="feature-desc">チェックした役務範囲に応じて不要なスライドを自動削除。毎回の手動削除作業が不要になります。</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon orange">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="feature-title">プレビュー確認</div>
+        <div class="feature-desc">スライド生成前にAI生成テキストをプレビュー画面で確認。内容を確認してからワンクリックで資料を作成できます。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flow -->
+  <div class="flow-section" id="flow">
+    <div>
+      <div class="section-label">How to Use</div>
+      <h2 class="section-title">3ステップで資料が完成</h2>
+      <p class="section-sub">フォームに入力して、ボタンを押すだけ。あとはAIにお任せください。</p>
+
+      <div class="flow-steps fade-up">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-title">フォームに入力</div>
+          <div class="flow-step-desc">顧客名・制作目的・課題・デザイン要望をメモ書きレベルで入力。参考画像やガントチャートもドラッグ&ドロップ。</div>
+          <span class="flow-step-arrow">&rarr;</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-title">AIが自動整形</div>
+          <div class="flow-step-desc">OpenAI GPT-4oがメモを整った文章に変換。画像解析でスケジュール抽出やデザイン説明も自動生成。</div>
+          <span class="flow-step-arrow">&rarr;</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-title">スライド完成</div>
+          <div class="flow-step-desc">テンプレートに全テキストと画像が自動反映。Google Slidesのリンクが発行され、すぐに編集・共有できます。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compare -->
+  <section id="compare" class="fade-up">
+    <div class="section-label">Impact</div>
+    <h2 class="section-title">導入前後の変化</h2>
+    <p class="section-sub">手作業で行っていた資料作成が、AIによって劇的に効率化されます。</p>
+
+    <div class="compare-grid">
+      <div class="compare-card before">
+        <div class="compare-label">Before</div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#94949E" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/></svg>
+          </span>
+          テンプレートを手動コピーして編集開始
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#94949E" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/></svg>
+          </span>
+          各スライドのテキストを1つずつ手入力
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#94949E" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/></svg>
+          </span>
+          不要ページを毎回手動で削除
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#94949E" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/></svg>
+          </span>
+          デザイン参考画像の説明文を自分で考えて記入
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#94949E" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/></svg>
+          </span>
+          資料作成に 30〜60分
+        </div>
+      </div>
+
+      <div class="compare-arrow">&rarr;</div>
+
+      <div class="compare-card after">
+        <div class="compare-label">After</div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--accent)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          フォーム入力だけでテンプレート自動複製
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--accent)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          AIがメモからビジネス文書を自動生成
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--accent)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          役務範囲に応じて不要ページ自動削除
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--accent)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          参考画像をAIが解析してデザイン説明文を自動生成
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--accent)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          入力からスライド完成まで 約3分
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row fade-up">
+      <div class="stat-card">
+        <div class="stat-value">90%</div>
+        <div class="stat-label">作業時間の削減</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3 min</div>
+        <div class="stat-label">資料完成までの時間</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">40+</div>
+        <div class="stat-label">スライドの自動処理対象</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">コピペ作業</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech -->
+  <section id="tech" class="fade-up">
+    <div class="section-label">Tech Stack</div>
+    <h2 class="section-title">技術構成</h2>
+    <p class="section-sub">Google Apps Script + OpenAI API で構成された、デプロイ不要のサーバーレスアプリケーションです。</p>
+
+    <div class="tech-grid">
+      <div class="tech-tag">
+        <div class="tech-tag-icon" style="background:#0F9D58">G</div>
+        Google Apps Script
+      </div>
+      <div class="tech-tag">
+        <div class="tech-tag-icon" style="background:#4285F4">S</div>
+        Google Slides API
+      </div>
+      <div class="tech-tag">
+        <div class="tech-tag-icon" style="background:#34A853">D</div>
+        Google Drive API
+      </div>
+      <div class="tech-tag">
+        <div class="tech-tag-icon" style="background:#000000">AI</div>
+        OpenAI GPT-4o
+      </div>
+      <div class="tech-tag">
+        <div class="tech-tag-icon" style="background:#8B5CF6">V</div>
+        Vision API (画像解析)
+      </div>
+      <div class="tech-tag">
+        <div class="tech-tag-icon" style="background:#E34F26">H</div>
+        HTML / CSS / JavaScript
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-card fade-up">
+      <h2>資料作成を自動化しよう</h2>
+      <p>フォーム入力からスライド完成まで、AIがすべてサポートします。</p>
+      <a href="#" class="btn-white">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        ツールを使ってみる
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">M</div>
+        <span class="logo-text">MTG Doc AI</span>
+      </a>
+      <div class="footer-copy">ferret One Web制作チーム</div>
+    </div>
+  </footer>
+
+  <script>
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      document.getElementById('header').classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
