@@ -201,6 +201,10 @@
       challenges: document.getElementById('challenges').value,
       designRequest: document.getElementById('designRequest').value,
       scheduleImages: scheduleImages,
+      implementationPeriod: document.getElementById('implementationPeriod').value,
+      revisionPeriod: document.getElementById('revisionPeriod').value,
+      siteCheckPeriod: document.getElementById('siteCheckPeriod').value,
+      wfUrl: document.getElementById('wfUrl').value,
       scope: {
         structureProposal: document.getElementById('scopeStructure').checked,
         designCreation: document.getElementById('scopeDesign').checked,
@@ -209,6 +213,7 @@
         copyCreation: document.getElementById('scopeCopy').checked,
         copyProvided: document.getElementById('scopeCopyProvided').checked,
         siteCopy: document.getElementById('scopeSiteCopy').checked,
+        javascript: document.getElementById('scopeJavascript').checked,
       },
     };
   }
@@ -313,12 +318,16 @@
     const section = document.getElementById('previewSection');
     section.classList.add('active');
 
-    document.getElementById('previewPurpose').textContent = preview.purpose;
-    document.getElementById('previewChallenges').textContent = preview.challenges;
-    document.getElementById('previewDesign').textContent = preview.designProposal;
-    document.getElementById('previewReferences').textContent = preview.designReferences;
+    document.getElementById('previewPurpose').textContent = preview.purpose || '';
+    const goals = [preview.goal01, preview.goal02, preview.goal03].filter(Boolean).join('\n');
+    document.getElementById('previewGoals').textContent = goals || '（未生成）';
+    const challenges = [preview.challenge01, preview.challenge02, preview.challenge03].filter(Boolean).join('\n');
+    document.getElementById('previewChallenges').textContent = challenges || '（未生成）';
+    document.getElementById('previewDesignA').textContent =
+      (preview.designImageA_summary ? preview.designImageA_summary + '\n' + (preview.designImageA_detail || '') : '（未生成）');
+    document.getElementById('previewDesignB').textContent =
+      (preview.designImageB_summary ? preview.designImageB_summary + '\n' + (preview.designImageB_detail || '') : '（未生成）');
     document.getElementById('previewSchedule').textContent = preview.scheduleText || '（画像未添付）';
-    document.getElementById('previewScope').textContent = preview.scopeText;
 
     section.scrollIntoView({ behavior: 'smooth' });
     showToast('プレビューを生成しました', 'success');

@@ -203,6 +203,39 @@
 
           <div id="imagePreviewContainer" class="image-preview-container"></div>
         </div>
+
+        <div class="form-group">
+          <label for="implementationPeriod">実装期間</label>
+          <input type="text" id="implementationPeriod" placeholder="例: 2026/03/14 〜 2026/03/28">
+        </div>
+
+        <div class="form-group">
+          <label for="revisionPeriod">修正期間</label>
+          <input type="text" id="revisionPeriod" placeholder="例: 2026/03/29 〜 2026/04/04">
+        </div>
+
+        <div class="form-group">
+          <label for="siteCheckPeriod">サイトチェック期間</label>
+          <input type="text" id="siteCheckPeriod" placeholder="例: 2026/04/05 〜 2026/04/11">
+        </div>
+      </div>
+
+      <!-- 情報構成URL -->
+      <div class="card" id="section-wf">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon blue">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            情報構成
+          </h2>
+          <span class="card-badge">任意</span>
+        </div>
+
+        <div class="form-group">
+          <label for="wfUrl">情報構成（ワイヤーフレーム）確認用URL</label>
+          <input type="text" id="wfUrl" placeholder="例: https://example.com/wireframe">
+        </div>
       </div>
 
       <!-- 役務範囲 -->
@@ -245,6 +278,10 @@
             <input type="checkbox" id="scopeSiteCopy" onchange="updateNavDots()">
             <label for="scopeSiteCopy">サイトコピー</label>
           </div>
+          <div class="scope-tag">
+            <input type="checkbox" id="scopeJavascript" onchange="updateNavDots()">
+            <label for="scopeJavascript">JavaScript実装</label>
+          </div>
         </div>
       </div>
 
@@ -279,28 +316,28 @@
           </div>
 
           <div class="preview-item">
-            <h4>既存サイトの課題</h4>
+            <h4>制作目標</h4>
+            <pre id="previewGoals"></pre>
+          </div>
+
+          <div class="preview-item">
+            <h4>現状の顧客課題</h4>
             <pre id="previewChallenges"></pre>
           </div>
 
           <div class="preview-item">
-            <h4>デザイン要望・提案</h4>
-            <pre id="previewDesign"></pre>
+            <h4>デザインイメージ A</h4>
+            <pre id="previewDesignA"></pre>
           </div>
 
           <div class="preview-item">
-            <h4>デザイン参考サイト</h4>
-            <pre id="previewReferences"></pre>
+            <h4>デザインイメージ B</h4>
+            <pre id="previewDesignB"></pre>
           </div>
 
           <div class="preview-item">
             <h4>制作スケジュール</h4>
             <pre id="previewSchedule"></pre>
-          </div>
-
-          <div class="preview-item">
-            <h4>役務範囲</h4>
-            <pre id="previewScope"></pre>
           </div>
 
           <div class="btn-group">

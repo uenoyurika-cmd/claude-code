@@ -57,25 +57,31 @@ function callOpenAIApi(userMessage, systemPrompt) {
  * @returns {Object} 生成テキスト群
  */
 function generateTextsWithClaude(formData) {
-  const systemPrompt = `あなたはWeb制作会社の制作ディレクターです。
-制作MTG（ミーティング）資料を作成するために、入力された情報をもとにプロフェッショナルな文章を生成してください。
+  const systemPrompt = `あなたはferret One（BtoBマーケティングツール）のWeb制作ディレクターです。
+制作MTG資料のGoogle Slidesテンプレートに埋め込むテキストを生成してください。
 
 以下のルールに従ってください：
 - 簡潔で分かりやすいビジネス文書として整形する
-- 箇条書きを活用し、読みやすくする
 - 顧客の要望を的確に反映する
-- 制作チームが理解しやすい表現を使う
-- 必要に応じて提案や補足を加える
+- 制作チームと顧客の双方が理解しやすい表現を使う
+- 各項目は1〜2文程度で簡潔にまとめる
 
 出力はJSON形式で以下のキーを含めてください（値はすべて文字列型にしてください）：
 {
-  "purpose": "制作目的（整形済み）",
-  "challenges": "既存サイトの課題（整形済み）",
-  "designProposal": "デザイン要望・提案内容（整形済み）",
-  "designReferences": "デザイン参考サイトの提案（URL付き、2-3件）"
+  "purpose": "制作の大目的（1文で簡潔に）",
+  "goal01": "サイトの目標1（例：問い合わせ数の増加）",
+  "goal02": "サイトの目標2（例：ブランドイメージの刷新）",
+  "goal03": "サイトの目標3（なければ空文字）",
+  "challenge01": "現状の顧客課題1",
+  "challenge02": "現状の顧客課題2",
+  "challenge03": "現状の顧客課題3（なければ空文字）",
+  "designImageA_summary": "デザインイメージA概要（方向性を一言で）",
+  "designImageA_detail": "デザインイメージA詳細（配色・雰囲気・参考サイトURL等）",
+  "designImageB_summary": "デザインイメージB概要（方向性を一言で）",
+  "designImageB_detail": "デザインイメージB詳細（配色・雰囲気・参考サイトURL等）"
 }`;
 
-  const userMessage = `以下の情報をもとに、制作MTG資料用のテキストを生成してください。
+  const userMessage = `以下の情報をもとに、ferret One制作MTG資料用のテキストを生成してください。
 
 【顧客名】${formData.customerName || '未入力'}
 【アカウントID】${formData.accountId || '未入力'}
@@ -90,8 +96,8 @@ ${formData.challenges || '未入力'}
 【デザイン要望・提案希望（入力メモ）】
 ${formData.designRequest || '未入力'}
 
-上記を整形し、制作MTG資料として適切な文章にしてください。
-デザイン参考サイトは、入力されたデザイン要望に合いそうな実在の参考サイトを2〜3件提案してください。
+上記を整形し、テンプレートのプレースホルダーに埋め込む文章を生成してください。
+デザインイメージは2パターン（A/B）を提案してください。各パターンに実在の参考サイトURLを含めてください。
 JSON形式で出力してください。`;
 
   const responseText = callOpenAIApi(userMessage, systemPrompt);
