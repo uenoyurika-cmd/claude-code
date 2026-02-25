@@ -25,7 +25,7 @@ function doGet(e) {
     const template = HtmlService.createTemplateFromFile('LandingPage');
     template.appUrl = baseUrl; // LP内の「ツールを使ってみる」リンク先
     return template.evaluate()
-      .setTitle('MTG Doc AI - 制作MTG資料 自動生成ツール')
+      .setTitle('\u25A0 MTG Doc AI - 制作MTG資料 自動生成ツール')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
@@ -33,7 +33,7 @@ function doGet(e) {
   // アプリ本体
   const html = HtmlService.createTemplateFromFile('Index')
     .evaluate()
-    .setTitle('制作MTG資料 自動生成ツール')
+    .setTitle('\u25A0 制作MTG資料 自動生成ツール')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   return html;
