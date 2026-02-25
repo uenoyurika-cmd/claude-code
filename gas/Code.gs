@@ -33,9 +33,9 @@ function processForm(formData) {
   try {
     Logger.log('フォームデータ受信: ' + JSON.stringify(formData));
 
-    // 1. Claude APIで各テキストを生成・整形
+    // 1. OpenAI APIで各テキストを生成・整形
     const generatedTexts = generateTextsWithClaude(formData);
-    Logger.log('Claude API テキスト生成完了');
+    Logger.log('OpenAI API テキスト生成完了');
 
     // 2. スケジュール画像がある場合はテキスト抽出
     let scheduleText = '';
@@ -51,16 +51,25 @@ function processForm(formData) {
     const scopeText = formatScopeText(formData.scope);
 
     // 5. テンプレートを複製してプレースホルダーを置換
+    // AI応答が文字列以外（配列・オブジェクト等）の場合に備えてString()で変換
+    const toStr = (val) => {
+      if (val == null) return '';
+      if (typeof val === 'string') return val;
+      if (Array.isArray(val)) return val.join('\n');
+      if (typeof val === 'object') return JSON.stringify(val, null, 2);
+      return String(val);
+    };
+
     const replacements = {
-      '{{顧客名}}': formData.customerName || '',
-      '{{アカウントID}}': formData.accountId || '',
-      '{{制作内容}}': formData.productionContent || '',
-      '{{制作目的}}': generatedTexts.purpose || '',
-      '{{既存サイトの課題}}': generatedTexts.challenges || '',
-      '{{デザイン要望・提案}}': generatedTexts.designProposal || '',
-      '{{デザイン参考}}': designReferences,
-      '{{制作スケジュール}}': scheduleText,
-      '{{役務範囲}}': scopeText,
+      '{{顧客名}}': toStr(formData.customerName),
+      '{{アカウントID}}': toStr(formData.accountId),
+      '{{制作内容}}': toStr(formData.productionContent),
+      '{{制作目的}}': toStr(generatedTexts.purpose),
+      '{{既存サイトの課題}}': toStr(generatedTexts.challenges),
+      '{{デザイン要望・提案}}': toStr(generatedTexts.designProposal),
+      '{{デザイン参考}}': toStr(designReferences),
+      '{{制作スケジュール}}': toStr(scheduleText),
+      '{{役務範囲}}': toStr(scopeText),
       '{{日付}}': Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd'),
     };
 

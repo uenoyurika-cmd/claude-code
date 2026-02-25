@@ -96,7 +96,8 @@ function removeEmptySlides(presentation, replacements) {
   // 空の置換テキストに対応するセクション名を特定
   const emptyPlaceholders = [];
   for (const [placeholder, replacement] of Object.entries(replacements)) {
-    if (!replacement || replacement.trim() === '') {
+    const str = String(replacement || '');
+    if (!str || str.trim() === '') {
       emptyPlaceholders.push(placeholder);
     }
   }

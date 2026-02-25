@@ -350,7 +350,7 @@
     hideConfirm();
 
     const formData = collectFormData();
-    showLoading('制作MTG資料を生成中', 'Claude AIによるテキスト生成とGoogle Slides資料の作成を行っています');
+    showLoading('制作MTG資料を生成中', 'OpenAI によるテキスト生成とGoogle Slides資料の作成を行っています');
 
     google.script.run
       .withSuccessHandler(handleSubmitSuccess)

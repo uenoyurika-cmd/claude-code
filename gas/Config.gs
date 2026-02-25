@@ -8,23 +8,23 @@ const CONFIG = {
   // 生成したスライドの出力先フォルダID（空の場合はマイドライブ直下）
   OUTPUT_FOLDER_ID: '',
 
-  // Gemini API設定
-  GEMINI_MODEL: 'gemini-1.5-flash',
-  GEMINI_MAX_TOKENS: 4096,
+  // OpenAI API設定
+  OPENAI_MODEL: 'gpt-4o',
+  OPENAI_MAX_TOKENS: 4096,
 };
 
 /**
  * スクリプトプロパティからAPIキーを取得
  */
-function getGeminiApiKey() {
-  return PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+function getOpenAIApiKey() {
+  return PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
 }
 
 /**
  * スクリプトプロパティにAPIキーを設定（初回セットアップ用）
  */
-function setGeminiApiKey(apiKey) {
-  PropertiesService.getScriptProperties().setProperty('GEMINI_API_KEY', apiKey);
+function setOpenAIApiKey(apiKey) {
+  PropertiesService.getScriptProperties().setProperty('OPENAI_API_KEY', apiKey);
 }
 
 /**
