@@ -57,6 +57,19 @@ function callOpenAIApi(userMessage, systemPrompt) {
  * @returns {Object} 生成テキスト群
  */
 function generateTextsWithClaude(formData) {
+  const hasDesignRefA = formData.designRefImageA && formData.designRefImageA.startsWith('data:image');
+  const hasDesignRefB = formData.designRefImageB && formData.designRefImageB.startsWith('data:image');
+  const hasAnyImage = hasDesignRefA || hasDesignRefB;
+
+  // デザイン参考画像の有無でプロンプトを切り替え
+  const designImageInstruction = hasAnyImage
+    ? `デザインイメージについて：
+- 添付されたデザイン参考画像を分析し、その画像のデザイン特徴を説明してください
+- 参考画像Aがある場合：画像Aの配色・レイアウト・雰囲気・BtoBサイトとしての訴求ポイントをdesignImageA_summary/detailに記載
+- 参考画像Bがある場合：画像Bの配色・レイアウト・雰囲気・BtoBサイトとしての訴求ポイントをdesignImageB_summary/detailに記載
+- 参考画像がないパターンは、テキスト入力のデザイン要望から提案を生成してください`
+    : `デザインイメージは2パターン（A/B）を提案してください。各パターンに実在の参考サイトURLを含めてください。`;
+
   const systemPrompt = `あなたはferret One（BtoBマーケティングツール）のWeb制作ディレクターです。
 制作MTG資料のGoogle Slidesテンプレートに埋め込むテキストを生成してください。
 
@@ -65,6 +78,8 @@ function generateTextsWithClaude(formData) {
 - 顧客の要望を的確に反映する
 - 制作チームと顧客の双方が理解しやすい表現を使う
 - 各項目は1〜2文程度で簡潔にまとめる
+
+${designImageInstruction}
 
 出力はJSON形式で以下のキーを含めてください（値はすべて文字列型にしてください）：
 {
@@ -75,13 +90,13 @@ function generateTextsWithClaude(formData) {
   "challenge01": "現状の顧客課題1",
   "challenge02": "現状の顧客課題2",
   "challenge03": "現状の顧客課題3（なければ空文字）",
-  "designImageA_summary": "デザインイメージA概要（方向性を一言で）",
-  "designImageA_detail": "デザインイメージA詳細（配色・雰囲気・参考サイトURL等）",
-  "designImageB_summary": "デザインイメージB概要（方向性を一言で）",
-  "designImageB_detail": "デザインイメージB詳細（配色・雰囲気・参考サイトURL等）"
+  "designImageA_summary": "デザインイメージA概要（方向性を10文字程度で）",
+  "designImageA_detail": "デザインイメージA詳細（配色・レイアウト・雰囲気・訴求ポイント等を2〜3文で）",
+  "designImageB_summary": "デザインイメージB概要（方向性を10文字程度で）",
+  "designImageB_detail": "デザインイメージB詳細（配色・レイアウト・雰囲気・訴求ポイント等を2〜3文で）"
 }`;
 
-  const userMessage = `以下の情報をもとに、ferret One制作MTG資料用のテキストを生成してください。
+  const textMessage = `以下の情報をもとに、ferret One制作MTG資料用のテキストを生成してください。
 
 【顧客名】${formData.customerName || '未入力'}
 【アカウントID】${formData.accountId || '未入力'}
@@ -97,10 +112,16 @@ ${formData.challenges || '未入力'}
 ${formData.designRequest || '未入力'}
 
 上記を整形し、テンプレートのプレースホルダーに埋め込む文章を生成してください。
-デザインイメージは2パターン（A/B）を提案してください。各パターンに実在の参考サイトURLを含めてください。
 JSON形式で出力してください。`;
 
-  const responseText = callOpenAIApi(userMessage, systemPrompt);
+  let responseText;
+
+  if (hasAnyImage) {
+    // Vision API で画像付きリクエスト
+    responseText = callOpenAIApiWithImages(systemPrompt, textMessage, formData.designRefImageA, formData.designRefImageB);
+  } else {
+    responseText = callOpenAIApi(textMessage, systemPrompt);
+  }
 
   // JSONを抽出してパース
   const jsonMatch = responseText.match(/\{[\s\S]*\}/);
@@ -109,6 +130,85 @@ JSON形式で出力してください。`;
   }
 
   return JSON.parse(jsonMatch[0]);
+}
+
+/**
+ * デザイン参考画像付きでOpenAI APIにリクエストを送信する（Vision対応）
+ * @param {string} systemPrompt - システムプロンプト
+ * @param {string} textMessage - テキストメッセージ
+ * @param {string|null} imageA - デザイン参考画像A（Base64 Data URL）
+ * @param {string|null} imageB - デザイン参考画像B（Base64 Data URL）
+ * @returns {string} レスポンステキスト
+ */
+function callOpenAIApiWithImages(systemPrompt, textMessage, imageA, imageB) {
+  const apiKey = getOpenAIApiKey();
+  if (!apiKey) {
+    throw new Error('OpenAI APIキーが設定されていません。');
+  }
+
+  // マルチモーダルコンテンツを構築
+  const contentParts = [];
+
+  if (imageA) {
+    contentParts.push({
+      type: 'text',
+      text: '【デザイン参考画像A】以下の画像はデザインイメージAの参考サイトです：',
+    });
+    contentParts.push({
+      type: 'image_url',
+      image_url: { url: imageA },
+    });
+  }
+
+  if (imageB) {
+    contentParts.push({
+      type: 'text',
+      text: '【デザイン参考画像B】以下の画像はデザインイメージBの参考サイトです：',
+    });
+    contentParts.push({
+      type: 'image_url',
+      image_url: { url: imageB },
+    });
+  }
+
+  contentParts.push({
+    type: 'text',
+    text: textMessage,
+  });
+
+  const url = 'https://api.openai.com/v1/chat/completions';
+
+  const payload = {
+    model: CONFIG.OPENAI_MODEL,
+    max_tokens: CONFIG.OPENAI_MAX_TOKENS,
+    temperature: 0.7,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: contentParts },
+    ],
+  };
+
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      'Authorization': 'Bearer ' + apiKey,
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true,
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const responseCode = response.getResponseCode();
+
+  if (responseCode !== 200) {
+    const errorBody = response.getContentText();
+    Logger.log('OpenAI Vision API Error: ' + responseCode + ' - ' + errorBody);
+    throw new Error('OpenAI API エラー (HTTP ' + responseCode + '): ' + errorBody);
+  }
+
+  const result = JSON.parse(response.getContentText());
+  return result.choices[0].message.content;
 }
 
 /**
