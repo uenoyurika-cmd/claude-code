@@ -11,7 +11,7 @@
  * @param {Object} scope - 役務範囲（ページ取捨選択に使用）
  * @returns {string} 生成されたスライドのURL
  */
-function createSlideFromTemplate(customerName, replacements, scope) {
+function createSlideFromTemplate(customerName, replacements, scope, designRefImages) {
   const templateId = getTemplateSlideId();
   const templateFile = DriveApp.getFileById(templateId);
 
@@ -36,6 +36,11 @@ function createSlideFromTemplate(customerName, replacements, scope) {
   // 全スライドのプレースホルダーを置換
   for (const slide of slides) {
     replaceTextInSlide(slide, replacements);
+  }
+
+  // デザイン参考画像をスライドに挿入
+  if (designRefImages) {
+    insertDesignRefImages(presentation, designRefImages);
   }
 
   // 役務範囲に基づいて不要ページを削除
@@ -187,6 +192,86 @@ function removeSlidesBasedOnScope(presentation, scope) {
       }
     }
   }
+}
+
+/**
+ * デザイン参考画像を「デザインイメージのご提案」スライドに挿入する
+ *
+ * テンプレートの40ページ目（「デザインイメージのご提案」）にある
+ * 【イメージ A】【イメージ B】の下に参考画像を挿入する。
+ *
+ * @param {Presentation} presentation - プレゼンテーションオブジェクト
+ * @param {Object} designRefImages - { A: base64DataUrl, B: base64DataUrl }
+ */
+function insertDesignRefImages(presentation, designRefImages) {
+  if (!designRefImages.A && !designRefImages.B) return;
+
+  // 「デザインイメージのご提案」スライドを探す
+  const slides = presentation.getSlides();
+  let targetSlide = null;
+
+  for (const slide of slides) {
+    const text = getSlideFullText(slide);
+    if (text.includes('デザインイメージのご提案')) {
+      targetSlide = slide;
+      break;
+    }
+  }
+
+  if (!targetSlide) {
+    Logger.log('デザインイメージのご提案スライドが見つかりません');
+    return;
+  }
+
+  // スライドのサイズ情報（標準: 960pt x 540pt = 25400000 x 19050000 EMU）
+  // イメージAは左半分、イメージBは右半分に配置
+  var slideWidth = presentation.getPageWidth();
+  var slideHeight = presentation.getPageHeight();
+  var halfWidth = slideWidth / 2;
+
+  // 画像の配置パラメータ（上部はタイトル＋テキスト領域のため、下半分に配置）
+  var imgTop = slideHeight * 0.50;    // 上から50%の位置
+  var imgHeight = slideHeight * 0.40;  // 高さ40%
+  var imgWidth = halfWidth * 0.85;     // 幅は半分の85%
+  var marginX = halfWidth * 0.075;     // 左右マージン
+
+  // イメージA（左側に配置）
+  if (designRefImages.A) {
+    try {
+      var blobA = base64ToBlob(designRefImages.A);
+      targetSlide.insertImage(blobA, marginX, imgTop, imgWidth, imgHeight);
+      Logger.log('デザイン参考画像A を挿入しました');
+    } catch (e) {
+      Logger.log('デザイン参考画像A の挿入に失敗: ' + e.message);
+    }
+  }
+
+  // イメージB（右側に配置）
+  if (designRefImages.B) {
+    try {
+      var blobB = base64ToBlob(designRefImages.B);
+      targetSlide.insertImage(blobB, halfWidth + marginX, imgTop, imgWidth, imgHeight);
+      Logger.log('デザイン参考画像B を挿入しました');
+    } catch (e) {
+      Logger.log('デザイン参考画像B の挿入に失敗: ' + e.message);
+    }
+  }
+}
+
+/**
+ * Base64 Data URLからBlobに変換する
+ * @param {string} dataUrl - "data:image/png;base64,..." 形式の文字列
+ * @returns {Blob} 画像Blob
+ */
+function base64ToBlob(dataUrl) {
+  var matches = dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+  if (!matches) {
+    throw new Error('無効な画像データ形式です');
+  }
+  var contentType = matches[1];
+  var base64Data = matches[2];
+  var decoded = Utilities.base64Decode(base64Data);
+  return Utilities.newBlob(decoded, contentType, 'design_ref');
 }
 
 /**

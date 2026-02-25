@@ -82,7 +82,13 @@ function processForm(formData) {
       '{{WF_URL}}': toStr(formData.wfUrl),
     };
 
-    const slideUrl = createSlideFromTemplate(formData.customerName, replacements, formData.scope);
+    // 5. デザイン参考画像を収集
+    const designRefImages = {
+      A: formData.designRefImageA || null,
+      B: formData.designRefImageB || null,
+    };
+
+    const slideUrl = createSlideFromTemplate(formData.customerName, replacements, formData.scope, designRefImages);
     Logger.log('スライド生成完了: ' + slideUrl);
 
     return {

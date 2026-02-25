@@ -1,6 +1,8 @@
 <script>
   // 画像データ格納用
   let scheduleImages = [];
+  let designRefImageA = null;
+  let designRefImageB = null;
 
   /**
    * 初期化
@@ -38,6 +40,11 @@
     fileInput.addEventListener('change', (e) => {
       handleFiles(e.target.files);
     });
+
+    // デザイン参考画像A
+    initSingleImageUpload('designRefDropA', 'designRefFileA', 'designRefPreviewA', 'A');
+    // デザイン参考画像B
+    initSingleImageUpload('designRefDropB', 'designRefFileB', 'designRefPreviewB', 'B');
 
     // テキストフィールドの入力監視
     const fields = ['customerName', 'accountId', 'productionContent', 'purpose', 'challenges', 'designRequest'];
@@ -102,6 +109,88 @@
   }
 
   /**
+   * 単一画像アップロードエリアの初期化（デザイン参考用）
+   */
+  function initSingleImageUpload(dropId, fileInputId, previewId, label) {
+    const drop = document.getElementById(dropId);
+    const input = document.getElementById(fileInputId);
+    if (!drop || !input) return;
+
+    drop.addEventListener('click', () => input.click());
+
+    drop.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      drop.classList.add('dragover');
+    });
+
+    drop.addEventListener('dragleave', () => {
+      drop.classList.remove('dragover');
+    });
+
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleDesignRefFile(e.dataTransfer.files[0], label, previewId);
+      }
+    });
+
+    input.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleDesignRefFile(e.target.files[0], label, previewId);
+      }
+    });
+  }
+
+  /**
+   * デザイン参考画像を処理
+   */
+  function handleDesignRefFile(file, label, previewId) {
+    if (!file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (label === 'A') {
+        designRefImageA = e.target.result;
+      } else {
+        designRefImageB = e.target.result;
+      }
+      renderDesignRefPreview(previewId, e.target.result, label);
+      updateNavDots();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
+   * デザイン参考画像プレビューを描画
+   */
+  function renderDesignRefPreview(previewId, imgData, label) {
+    const container = document.getElementById(previewId);
+    container.innerHTML = '';
+
+    const div = document.createElement('div');
+    div.className = 'image-preview';
+    div.innerHTML = `
+      <img src="${imgData}" alt="デザイン参考 ${label}">
+      <button class="remove-btn" onclick="removeDesignRef('${label}', '${previewId}')">&times;</button>
+    `;
+    container.appendChild(div);
+  }
+
+  /**
+   * デザイン参考画像を削除
+   */
+  function removeDesignRef(label, previewId) {
+    if (label === 'A') {
+      designRefImageA = null;
+    } else {
+      designRefImageB = null;
+    }
+    document.getElementById(previewId).innerHTML = '';
+    updateNavDots();
+  }
+
+  /**
    * セクションへスクロール
    */
   function scrollToSection(sectionId) {
@@ -124,7 +213,7 @@
                      document.getElementById('productionContent').value.trim();
     const hasPurpose = document.getElementById('purpose').value.trim() ||
                        document.getElementById('challenges').value.trim();
-    const hasDesign = document.getElementById('designRequest').value.trim();
+    const hasDesign = document.getElementById('designRequest').value.trim() || designRefImageA || designRefImageB;
     const hasSchedule = scheduleImages.length > 0;
     const hasScope = document.querySelectorAll('.scope-tag input:checked').length > 0;
 
@@ -200,6 +289,8 @@
       purpose: document.getElementById('purpose').value,
       challenges: document.getElementById('challenges').value,
       designRequest: document.getElementById('designRequest').value,
+      designRefImageA: designRefImageA,
+      designRefImageB: designRefImageB,
       scheduleImages: scheduleImages,
       implementationPeriod: document.getElementById('implementationPeriod').value,
       revisionPeriod: document.getElementById('revisionPeriod').value,
