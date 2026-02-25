@@ -16,7 +16,7 @@ function createSlideFromTemplate(customerName, replacements) {
 
   // ファイル名を生成
   const dateStr = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
-  const newFileName = dateStr + '_制作MTG資料_' + (customerName || '顧客名未設定');
+  const newFileName = '【' + (customerName || '顧客名未設定') + '御中】ferretOne制作MTG資料_' + dateStr;
 
   // テンプレートを複製
   let newFile;
