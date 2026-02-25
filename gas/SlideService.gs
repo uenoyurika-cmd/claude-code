@@ -58,36 +58,51 @@ function createSlideFromTemplate(customerName, replacements, scope, designRefIma
  * @param {Object} replacements - プレースホルダーと置換テキストのマップ
  */
 function replaceTextInSlide(slide, replacements) {
-  const shapes = slide.getShapes();
+  const pageElements = slide.getPageElements();
+  for (const element of pageElements) {
+    replaceTextInElement(element, replacements);
+  }
+}
 
-  for (const shape of shapes) {
+/**
+ * ページ要素内のテキストを再帰的に置換する（グループ内要素も対応）
+ * @param {PageElement} element - ページ要素
+ * @param {Object} replacements - プレースホルダーと置換テキストのマップ
+ */
+function replaceTextInElement(element, replacements) {
+  const type = element.getPageElementType();
+
+  if (type === SlidesApp.PageElementType.SHAPE) {
+    const shape = element.asShape();
     const textRange = shape.getText();
-    if (!textRange) continue;
-
-    const text = textRange.asString();
-
-    for (const [placeholder, replacement] of Object.entries(replacements)) {
-      if (text.includes(placeholder)) {
-        textRange.replaceAllText(placeholder, replacement);
+    if (textRange) {
+      const text = textRange.asString();
+      for (const [placeholder, replacement] of Object.entries(replacements)) {
+        if (text.includes(placeholder)) {
+          textRange.replaceAllText(placeholder, replacement);
+        }
       }
     }
-  }
-
-  // テーブル内のテキストも置換
-  const tables = slide.getTables();
-  for (const table of tables) {
+  } else if (type === SlidesApp.PageElementType.TABLE) {
+    const table = element.asTable();
     for (let row = 0; row < table.getNumRows(); row++) {
       for (let col = 0; col < table.getNumColumns(); col++) {
         const cell = table.getCell(row, col);
         const textRange = cell.getText();
         const text = textRange.asString();
-
         for (const [placeholder, replacement] of Object.entries(replacements)) {
           if (text.includes(placeholder)) {
             textRange.replaceAllText(placeholder, replacement);
           }
         }
       }
+    }
+  } else if (type === SlidesApp.PageElementType.GROUP) {
+    // グループ内の子要素を再帰的に処理
+    const group = element.asGroup();
+    const children = group.getChildren();
+    for (const child of children) {
+      replaceTextInElement(child, replacements);
     }
   }
 }
@@ -279,17 +294,29 @@ function base64ToBlob(dataUrl) {
  */
 function getSlideFullText(slide) {
   let text = '';
-  const shapes = slide.getShapes();
-  for (const shape of shapes) {
-    const textRange = shape.getText();
+  const pageElements = slide.getPageElements();
+  for (const element of pageElements) {
+    text += getTextFromElement(element);
+  }
+  return text;
+}
+
+/**
+ * ページ要素からテキストを再帰的に取得する（グループ内要素も対応）
+ * @param {PageElement} element - ページ要素
+ * @returns {string} テキスト
+ */
+function getTextFromElement(element) {
+  let text = '';
+  const type = element.getPageElementType();
+
+  if (type === SlidesApp.PageElementType.SHAPE) {
+    const textRange = element.asShape().getText();
     if (textRange) {
       text += textRange.asString() + '\n';
     }
-  }
-
-  // テーブル内のテキストも含める
-  const tables = slide.getTables();
-  for (const table of tables) {
+  } else if (type === SlidesApp.PageElementType.TABLE) {
+    const table = element.asTable();
     for (let row = 0; row < table.getNumRows(); row++) {
       for (let col = 0; col < table.getNumColumns(); col++) {
         const cell = table.getCell(row, col);
@@ -298,6 +325,12 @@ function getSlideFullText(slide) {
           text += textRange.asString() + '\n';
         }
       }
+    }
+  } else if (type === SlidesApp.PageElementType.GROUP) {
+    const group = element.asGroup();
+    const children = group.getChildren();
+    for (const child of children) {
+      text += getTextFromElement(child);
     }
   }
 
