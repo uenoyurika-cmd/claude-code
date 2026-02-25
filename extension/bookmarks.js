@@ -1,5 +1,7 @@
 // Shared bookmark utilities used by both popup and manager
 
+const FOLDER_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>';
+
 const BookmarkManager = {
   // Fetch the full bookmark tree
   async getTree() {
@@ -107,7 +109,7 @@ const BookmarkManager = {
     if (this.isFolder(node)) {
       return `
         <div class="bookmark-item folder" data-id="${node.id}" ${draggable ? 'draggable="true"' : ""}>
-          <span class="folder-icon">📁</span>
+          <span class="folder-icon">${FOLDER_SVG}</span>
           <span class="bookmark-title">${this.escapeHtml(node.title || "無題のフォルダ")}</span>
           <span class="item-count">${node.children ? node.children.length : ""}</span>
         </div>
@@ -117,7 +119,7 @@ const BookmarkManager = {
     const favicon = this.getFaviconUrl(node.url);
     return `
       <div class="bookmark-item bookmark" data-id="${node.id}" data-url="${this.escapeHtml(node.url)}" ${draggable ? 'draggable="true"' : ""}>
-        <img class="favicon" src="${favicon}" alt="" width="16" height="16" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><rect width=%2216%22 height=%2216%22 rx=%222%22 fill=%22%23ddd%22/></svg>'">
+        <img class="favicon" src="${favicon}" alt="" width="16" height="16" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><rect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23E8E8EA%22/></svg>'">
         <div class="bookmark-info">
           <span class="bookmark-title">${this.escapeHtml(node.title || node.url)}</span>
           ${showPath && folderPath ? `<span class="bookmark-path">${this.escapeHtml(folderPath)}</span>` : ""}

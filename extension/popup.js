@@ -10,6 +10,7 @@ let searchTimeout = null;
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   loadBookmarks();
+  loadDockPosition();
   setupEventListeners();
 });
 
@@ -18,6 +19,16 @@ function setupEventListeners() {
   openDetachedBtn.addEventListener("click", () => {
     chrome.runtime.sendMessage({ action: "openDetachedWindow" });
     window.close();
+  });
+
+  // Dock position selector
+  document.querySelectorAll(".dock-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const position = btn.dataset.position;
+      document.querySelectorAll(".dock-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      chrome.runtime.sendMessage({ action: "setDockPosition", position });
+    });
   });
 
   // Search with debounce
@@ -40,6 +51,16 @@ function setupEventListeners() {
   bookmarkTree.addEventListener("click", handleItemClick);
 }
 
+async function loadDockPosition() {
+  chrome.runtime.sendMessage({ action: "getDockPosition" }, (response) => {
+    if (response && response.position) {
+      document.querySelectorAll(".dock-btn").forEach(b => b.classList.remove("active"));
+      const active = document.querySelector(`.dock-btn[data-position="${response.position}"]`);
+      if (active) active.classList.add("active");
+    }
+  });
+}
+
 async function loadBookmarks() {
   const tree = await BookmarkManager.getTree();
   renderTree(tree[0].children);
@@ -52,8 +73,8 @@ function renderTree(nodes) {
       html += `
         <div class="tree-folder" data-id="${node.id}">
           <div class="bookmark-item folder" data-id="${node.id}">
-            <span class="folder-toggle">▶</span>
-            <span class="folder-icon">📁</span>
+            <span class="folder-toggle">&#9654;</span>
+            <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg></span>
             <span class="bookmark-title">${BookmarkManager.escapeHtml(node.title || "無題")}</span>
             <span class="item-count">${node.children ? node.children.length : 0}</span>
           </div>
@@ -76,8 +97,8 @@ function renderChildNodes(nodes) {
       html += `
         <div class="tree-folder" data-id="${node.id}">
           <div class="bookmark-item folder" data-id="${node.id}">
-            <span class="folder-toggle">▶</span>
-            <span class="folder-icon">📁</span>
+            <span class="folder-toggle">&#9654;</span>
+            <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg></span>
             <span class="bookmark-title">${BookmarkManager.escapeHtml(node.title || "無題")}</span>
             <span class="item-count">${node.children ? node.children.length : 0}</span>
           </div>
@@ -118,7 +139,7 @@ function handleItemClick(e) {
       const toggle = item.querySelector(".folder-toggle");
       if (children) {
         children.classList.toggle("collapsed");
-        toggle.textContent = children.classList.contains("collapsed") ? "▶" : "▼";
+        toggle.innerHTML = children.classList.contains("collapsed") ? "&#9654;" : "&#9660;";
       }
     }
     return;
@@ -141,8 +162,10 @@ async function addCurrentPage() {
     });
     loadBookmarks();
     addBookmarkBtn.textContent = "✓ 追加しました";
+    addBookmarkBtn.classList.add("btn-success");
     setTimeout(() => {
       addBookmarkBtn.textContent = "+ 現在のページを追加";
+      addBookmarkBtn.classList.remove("btn-success");
     }, 1500);
   }
 }

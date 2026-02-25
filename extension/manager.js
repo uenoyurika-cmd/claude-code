@@ -20,6 +20,7 @@ let searchTimeout = null;
 document.addEventListener("DOMContentLoaded", () => {
   loadSidebar();
   navigateToFolder("0");
+  loadDockPosition();
   setupEventListeners();
 });
 
@@ -40,6 +41,16 @@ function setupEventListeners() {
   // View toggle
   viewTreeBtn.addEventListener("click", () => setView("tree"));
   viewGridBtn.addEventListener("click", () => setView("grid"));
+
+  // Dock position selector
+  document.querySelectorAll(".dock-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const position = btn.dataset.position;
+      document.querySelectorAll(".dock-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      chrome.runtime.sendMessage({ action: "setDockPosition", position });
+    });
+  });
 
   // Add folder
   addFolderBtn.addEventListener("click", () => createNewFolder());
@@ -81,6 +92,18 @@ function setupEventListeners() {
   });
 }
 
+// ===== Dock Position =====
+
+function loadDockPosition() {
+  chrome.runtime.sendMessage({ action: "getDockPosition" }, (response) => {
+    if (response && response.position) {
+      document.querySelectorAll(".dock-btn").forEach(b => b.classList.remove("active"));
+      const active = document.querySelector(`.dock-btn[data-position="${response.position}"]`);
+      if (active) active.classList.add("active");
+    }
+  });
+}
+
 // ===== Sidebar =====
 
 async function loadSidebar() {
@@ -97,7 +120,7 @@ function renderSidebarFolders(nodes, depth = 0) {
       const childCount = node.children ? node.children.filter(c => !c.url).length : 0;
       html += `
         <div class="sidebar-folder" data-id="${node.id}" style="padding-left: ${indent + 8}px">
-          <span class="folder-icon">📁</span>
+          <svg class="sidebar-folder-icon" width="14" height="14" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
           <span class="folder-name">${BookmarkManager.escapeHtml(node.title || "Root")}</span>
         </div>
       `;
@@ -116,7 +139,6 @@ function handleSidebarClick(e) {
   const folder = e.target.closest(".sidebar-folder");
   if (folder) {
     navigateToFolder(folder.dataset.id);
-    // Highlight active
     folderTreeEl.querySelectorAll(".sidebar-folder").forEach(f => f.classList.remove("active"));
     folder.classList.add("active");
   }
@@ -145,15 +167,13 @@ async function renderBreadcrumb(folderId) {
     return;
   }
 
-  // Build clickable breadcrumb from path
   const parts = path.split(" / ");
   let html = `<span class="breadcrumb-item clickable" data-id="0">すべて</span>`;
-  // We need folder IDs for each part - simplified: just show the path
   html += parts.map((part, i) => {
     if (i === parts.length - 1) {
-      return ` <span class="breadcrumb-sep">›</span> <span class="breadcrumb-item active">${BookmarkManager.escapeHtml(part)}</span>`;
+      return ` <span class="breadcrumb-sep">&#8250;</span> <span class="breadcrumb-item active">${BookmarkManager.escapeHtml(part)}</span>`;
     }
-    return ` <span class="breadcrumb-sep">›</span> <span class="breadcrumb-item">${BookmarkManager.escapeHtml(part)}</span>`;
+    return ` <span class="breadcrumb-sep">&#8250;</span> <span class="breadcrumb-item">${BookmarkManager.escapeHtml(part)}</span>`;
   }).join("");
 
   breadcrumb.innerHTML = html;
@@ -170,7 +190,6 @@ function renderContent(nodes) {
 
 function renderList(nodes) {
   let html = "";
-  // Show folders first, then bookmarks
   const folders = nodes.filter(n => BookmarkManager.isFolder(n));
   const bookmarks = nodes.filter(n => !BookmarkManager.isFolder(n));
 
@@ -179,7 +198,7 @@ function renderList(nodes) {
   }
 
   bookmarkTree.className = "bookmark-tree view-list";
-  bookmarkTree.innerHTML = html || '<div class="empty-state">このフォルダは空です</div>';
+  bookmarkTree.innerHTML = html || '<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><p>このフォルダは空です</p></div>';
 }
 
 function renderGrid(nodes) {
@@ -191,7 +210,7 @@ function renderGrid(nodes) {
     if (BookmarkManager.isFolder(node)) {
       html += `
         <div class="grid-item folder" data-id="${node.id}" draggable="true">
-          <div class="grid-icon">📁</div>
+          <div class="grid-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg></div>
           <div class="grid-title">${BookmarkManager.escapeHtml(node.title || "無題")}</div>
           <div class="grid-count">${node.children ? node.children.length : 0} 件</div>
         </div>
@@ -200,7 +219,7 @@ function renderGrid(nodes) {
       const favicon = BookmarkManager.getFaviconUrl(node.url);
       html += `
         <div class="grid-item bookmark" data-id="${node.id}" data-url="${BookmarkManager.escapeHtml(node.url)}" draggable="true">
-          <img class="grid-favicon" src="${favicon}" alt="" width="32" height="32" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%224%22 fill=%22%23ddd%22/></svg>'">
+          <img class="grid-favicon" src="${favicon}" alt="" width="32" height="32" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%224%22 fill=%22%23e8e8e8%22/></svg>'">
           <div class="grid-title">${BookmarkManager.escapeHtml(node.title || node.url)}</div>
         </div>
       `;
@@ -208,7 +227,7 @@ function renderGrid(nodes) {
   }
 
   bookmarkTree.className = "bookmark-tree view-grid";
-  bookmarkTree.innerHTML = html || '<div class="empty-state">このフォルダは空です</div>';
+  bookmarkTree.innerHTML = html || '<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><p>このフォルダは空です</p></div>';
 }
 
 // ===== Search =====
@@ -217,7 +236,7 @@ async function searchBookmarks(query) {
   const results = await BookmarkManager.search(query);
   let html = "";
   if (results.length === 0) {
-    html = '<div class="empty-state">検索結果がありません</div>';
+    html = '<div class="empty-state"><p>検索結果がありません</p></div>';
   } else {
     for (const node of results) {
       const path = folderPaths[node.parentId] || "";
@@ -267,7 +286,6 @@ function handleContextMenu(e) {
   contextMenu.style.top = `${e.clientY}px`;
   contextMenu.classList.remove("hidden");
 
-  // Adjust if menu goes off-screen
   const rect = contextMenu.getBoundingClientRect();
   if (rect.right > window.innerWidth) {
     contextMenu.style.left = `${e.clientX - rect.width}px`;
@@ -355,7 +373,6 @@ async function showMoveModal(id) {
   document.getElementById("urlGroup").classList.add("hidden");
   document.getElementById("parentGroup").classList.remove("hidden");
 
-  // Populate folder select
   const select = document.getElementById("editParent");
   select.innerHTML = "";
   for (const [fid, path] of Object.entries(folderPaths)) {
@@ -371,7 +388,6 @@ async function showMoveModal(id) {
 
 function hideModal() {
   editModal.classList.add("hidden");
-  // Reset visibility
   document.getElementById("editName").parentElement.classList.remove("hidden");
   document.getElementById("urlGroup").classList.remove("hidden");
   document.getElementById("parentGroup").classList.remove("hidden");
@@ -438,7 +454,6 @@ async function handleDrop(e) {
     loadSidebar();
   }
 
-  // Cleanup
   document.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
   document.querySelectorAll(".dragging").forEach(el => el.classList.remove("dragging"));
   draggedId = null;

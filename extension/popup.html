@@ -6,20 +6,69 @@
 </head>
 <body class="popup-body">
   <div class="popup-container">
+    <!-- Circuit overlay background -->
+    <div class="circuit-overlay"></div>
+
     <div class="popup-header">
-      <h1>Bookmark Manager+</h1>
-      <button id="openDetached" class="btn-icon" title="別ウィンドウで開く">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M2 2h5v1H3v10h10V8h1v5a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm7 0h5v5h-1V3.7L8.35 8.35l-.7-.7L12.29 3H9V2z"/>
-        </svg>
-      </button>
+      <div class="header-brand">
+        <span class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+          </svg>
+        </span>
+        <h1>Bookmark Manager<span class="accent-plus">+</span></h1>
+      </div>
+      <div class="header-controls">
+        <button id="openDetached" class="btn-icon" title="別ウィンドウで開く">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M2 2h5v1H3v10h10V8h1v5a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm7 0h5v5h-1V3.7L8.35 8.35l-.7-.7L12.29 3H9V2z"/>
+          </svg>
+        </button>
+      </div>
     </div>
+
+    <!-- Dock Position Selector -->
+    <div class="dock-selector">
+      <span class="dock-label">配置:</span>
+      <div class="dock-positions">
+        <button class="dock-btn" data-position="left" title="左端に固定">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="0" y="1" width="5" height="14" rx="1" fill="currentColor"/><rect x="7" y="1" width="9" height="14" rx="1" fill="currentColor" opacity="0.2"/></svg>
+        </button>
+        <button class="dock-btn" data-position="top" title="上端に固定">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="0" width="14" height="5" rx="1" fill="currentColor"/><rect x="1" y="7" width="14" height="9" rx="1" fill="currentColor" opacity="0.2"/></svg>
+        </button>
+        <button class="dock-btn active" data-position="center" title="中央">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="1" fill="currentColor"/><rect x="0" y="0" width="16" height="16" rx="1" fill="currentColor" opacity="0.1"/></svg>
+        </button>
+        <button class="dock-btn" data-position="bottom" title="下端に固定">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="0" width="14" height="9" rx="1" fill="currentColor" opacity="0.2"/><rect x="1" y="11" width="14" height="5" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="dock-btn" data-position="right" title="右端に固定">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="0" y="1" width="9" height="14" rx="1" fill="currentColor" opacity="0.2"/><rect x="11" y="1" width="5" height="14" rx="1" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Wave divider -->
+    <div class="wave-divider">
+      <svg viewBox="0 0 380 12" preserveAspectRatio="none">
+        <path d="M0,6 C60,0 120,12 190,6 C260,0 320,12 380,6 L380,12 L0,12 Z" fill="var(--bg-primary)"/>
+      </svg>
+    </div>
+
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="ブックマークを検索...">
+      <div class="search-wrapper">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="ブックマークを検索...">
+      </div>
     </div>
+
     <div id="bookmarkTree" class="bookmark-tree"></div>
+
     <div class="popup-footer">
-      <button id="addBookmark" class="btn-primary">+ 現在のページを追加</button>
+      <button id="addBookmark" class="btn-primary btn-pill">+ 現在のページを追加</button>
     </div>
   </div>
   <script src="bookmarks.js"></script>
