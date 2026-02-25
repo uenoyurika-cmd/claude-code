@@ -7,8 +7,30 @@
 
 /**
  * Webアプリのエントリポイント（GET）
+ *
+ * URLパラメータでページを切り替え：
+ *   ?page=lp  → 紹介ランディングページ (LandingPage.html)
+ *   それ以外   → アプリ本体 (Index.html)
+ *
+ * 例：
+ *   https://script.google.com/.../exec          → アプリ本体
+ *   https://script.google.com/.../exec?page=lp  → 紹介LP
  */
-function doGet() {
+function doGet(e) {
+  const page = (e && e.parameter && e.parameter.page) || '';
+
+  if (page === 'lp') {
+    // 紹介ランディングページ
+    const baseUrl = ScriptApp.getService().getUrl();
+    const template = HtmlService.createTemplateFromFile('LandingPage');
+    template.appUrl = baseUrl; // LP内の「ツールを使ってみる」リンク先
+    return template.evaluate()
+      .setTitle('MTG Doc AI - 制作MTG資料 自動生成ツール')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  // アプリ本体
   const html = HtmlService.createTemplateFromFile('Index')
     .evaluate()
     .setTitle('制作MTG資料 自動生成ツール')
