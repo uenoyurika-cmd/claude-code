@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Manager List View — Bookmark Manager+</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+html, body { margin:0; padding:0; height:100%; background:#1a1a2e; display:flex; align-items:center; justify-content:center; }
+
+:root {
+  --yellow: #F5DF4D; --yellow-hover: #E8D340; --yellow-light: #FDF8D4;
+  --yellow-glow: rgba(245,223,77,0.25); --gray: #939597; --gray-dark: #6B6D6F;
+  --gray-light: #C8C9CB; --gray-subtle: #E8E8EA;
+  --bg-primary: #FFFFFF; --bg-secondary: #F7F7F8; --bg-sidebar: #F0F0F2;
+  --text-primary: #333333; --text-secondary: #666666; --text-muted: #999999;
+  --accent: #F5DF4D; --accent-text: #B8A200;
+  --border: #E0E0E2; --border-light: #ECECEE;
+  --danger: #E74C3C;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-pill: 50px;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+.device-frame {
+  width: 960px;
+  height: 620px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 30px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+  position: relative;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+
+.screenshot-label {
+  position: absolute;
+  top: -36px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, var(--yellow-light) 0%, var(--bg-secondary) 60%, var(--bg-primary) 100%);
+  gap: 16px;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image:
+    radial-gradient(circle, var(--gray) 1px, transparent 1px),
+    linear-gradient(0deg, transparent 48%, var(--gray) 49%, var(--gray) 51%, transparent 52%),
+    linear-gradient(90deg, transparent 48%, var(--gray) 49%, var(--gray) 51%, transparent 52%);
+  background-size: 24px 24px, 48px 48px, 48px 48px;
+}
+
+.header-brand {
+  display: flex; align-items: center; gap: 8px; z-index:1;
+}
+.brand-icon {
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px;
+  background:var(--yellow); border-radius:var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(245,223,77,0.3);
+}
+h1 { font-size:17px; font-weight:700; letter-spacing:-0.03em; white-space:nowrap; }
+.accent-plus { color:var(--yellow-hover); font-weight:800; }
+
+.header-actions {
+  display: flex; align-items: center; gap: 10px; flex:1; z-index:1;
+}
+
+/* Search */
+.search-wrapper { position:relative; flex:1; }
+.search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray); }
+.search-input {
+  width:100%; padding:9px 12px 9px 36px;
+  border:1px solid var(--border); border-radius:var(--radius-pill);
+  font-family:inherit; font-size:13px; font-weight:500;
+  background:var(--bg-primary); color:var(--text-primary); outline:none;
+}
+
+/* View toggle */
+.view-toggle {
+  display:flex; border:1px solid var(--border);
+  border-radius:var(--radius-pill); overflow:hidden; background:var(--bg-primary);
+}
+.btn-view {
+  display:flex; align-items:center; justify-content:center;
+  width:32px; height:28px; border:none; background:transparent; color:var(--gray);
+}
+.btn-view:first-child { border-right:1px solid var(--border); }
+.btn-view.active { background:var(--yellow); color:var(--text-primary); }
+
+/* Dock */
+.dock-selector-inline {
+  display:flex; align-items:center; gap:3px;
+  background:var(--bg-secondary); border:1px solid var(--border);
+  border-radius:var(--radius-pill); padding:3px;
+}
+.dock-btn {
+  display:flex; align-items:center; justify-content:center;
+  width:26px; height:22px; border:none; border-radius:var(--radius-pill);
+  background:transparent; color:var(--gray);
+}
+.dock-btn.active { background:var(--yellow); color:var(--text-primary); box-shadow:0 1px 4px rgba(245,223,77,0.4); }
+
+/* Wave */
+.wave-divider { line-height:0; }
+.wave-divider svg { display:block; width:100%; height:14px; }
+
+/* Layout */
+.layout { display:flex; flex:1; overflow:hidden; }
+
+/* Sidebar */
+.sidebar {
+  width:230px; min-width:230px;
+  background:var(--bg-sidebar);
+  border-right:1px solid var(--border-light);
+  display:flex; flex-direction:column;
+}
+.sidebar-header {
+  display:flex; align-items:center; gap:6px;
+  padding:14px 16px 10px;
+  font-size:11px; font-weight:700; color:var(--gray);
+  text-transform:uppercase; letter-spacing:0.8px;
+}
+.sidebar-folder {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 12px;
+  font-size:13px; font-weight:500; color:var(--text-secondary);
+  border-left:3px solid transparent;
+}
+.sidebar-folder.active {
+  background:rgba(245,223,77,0.15);
+  color:var(--text-primary);
+  border-left-color:var(--yellow);
+  font-weight:600;
+}
+.sidebar-folder.indent1 { padding-left:28px; }
+.sidebar-folder.indent2 { padding-left:44px; }
+.btn-sidebar {
+  margin:8px 12px 14px; padding:8px 12px;
+  border:1px dashed var(--gray-light);
+  border-radius:var(--radius-pill);
+  background:transparent; color:var(--gray);
+  font-family:inherit; font-size:12px; font-weight:500;
+  text-align:center;
+}
+
+.folder-svg { flex-shrink:0; }
+
+/* Main Content */
+.main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+.breadcrumb {
+  padding:10px 20px; font-size:12px; font-weight:500;
+  color:var(--text-secondary);
+  border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:4px;
+}
+.breadcrumb-link { color:var(--accent-text); font-weight:600; }
+.breadcrumb-sep { color:var(--gray-light); }
+.breadcrumb-current { color:var(--text-primary); font-weight:600; }
+
+/* Bookmark items */
+.bookmark-list { flex:1; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:2px; }
+
+.bookmark-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 12px;
+  border-radius:var(--radius-md);
+  border:1px solid transparent;
+}
+.bookmark-item:hover, .bookmark-item.hovered {
+  background:rgba(147,149,151,0.08);
+  border-color:var(--border-light);
+  box-shadow:var(--shadow-card);
+}
+.bookmark-item.drag-over {
+  background:rgba(245,223,77,0.15);
+  border-color:var(--yellow);
+  box-shadow:0 4px 20px rgba(245,223,77,0.3);
+}
+
+.folder-icon { display:flex; align-items:center; flex-shrink:0; }
+.favicon { width:16px; height:16px; border-radius:3px; flex-shrink:0; }
+.bm-info { display:flex; flex-direction:column; gap:2px; overflow:hidden; min-width:0; }
+.bm-title { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bm-url { font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.item-count { font-size:11px; color:var(--gray); margin-left:auto; background:var(--gray-subtle); padding:1px 7px; border-radius:50px; font-weight:600; }
+
+/* Context menu */
+.context-menu {
+  position:absolute;
+  background:var(--bg-primary);
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  padding:6px; min-width:180px;
+  z-index:100;
+}
+.context-menu button {
+  display:flex; align-items:center; gap:8px;
+  width:100%; padding:8px 12px;
+  border:none; background:none; text-align:left;
+  font-family:inherit; font-size:13px; font-weight:500;
+  color:var(--text-primary); border-radius:var(--radius-sm);
+}
+.context-menu button:hover, .context-menu button.hovered { background:rgba(147,149,151,0.08); }
+.context-menu button svg { flex-shrink:0; color:var(--gray); }
+.context-menu button.danger { color:var(--danger); }
+.context-menu button.danger svg { color:var(--danger); }
+.context-menu hr { border:none; border-top:1px solid var(--border-light); margin:4px 0; }
+</style>
+</head>
+<body>
+<div style="position:relative;">
+  <div class="screenshot-label">Manager — List View</div>
+  <div class="device-frame">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-brand">
+        <span class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        </span>
+        <h1>Bookmark Manager<span class="accent-plus">+</span></h1>
+      </div>
+      <div class="header-actions">
+        <div class="search-wrapper">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" type="text" placeholder="ブックマークを検索... (Ctrl+F)" readonly>
+        </div>
+        <div class="view-toggle">
+          <div class="btn-view active"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2h14v1H1zm2 3h12v1H3zm2 3h10v1H5zm-2 3h12v1H3zm-2 3h14v1H1z"/></svg></div>
+          <div class="btn-view"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></svg></div>
+        </div>
+        <div class="dock-selector-inline">
+          <div class="dock-btn"><svg width="14" height="14" viewBox="0 0 16 16"><rect x="0" y="1" width="5" height="14" rx="1" fill="currentColor"/><rect x="7" y="1" width="9" height="14" rx="1" fill="currentColor" opacity="0.2"/></svg></div>
+          <div class="dock-btn"><svg width="14" height="14" viewBox="0 0 16 16"><rect x="1" y="0" width="14" height="5" rx="1" fill="currentColor"/><rect x="1" y="7" width="14" height="9" rx="1" fill="currentColor" opacity="0.2"/></svg></div>
+          <div class="dock-btn active"><svg width="14" height="14" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="1" fill="currentColor"/><rect x="0" y="0" width="16" height="16" rx="1" fill="currentColor" opacity="0.1"/></svg></div>
+          <div class="dock-btn"><svg width="14" height="14" viewBox="0 0 16 16"><rect x="1" y="0" width="14" height="9" rx="1" fill="currentColor" opacity="0.2"/><rect x="1" y="11" width="14" height="5" rx="1" fill="currentColor"/></svg></div>
+          <div class="dock-btn"><svg width="14" height="14" viewBox="0 0 16 16"><rect x="0" y="1" width="9" height="14" rx="1" fill="currentColor" opacity="0.2"/><rect x="11" y="1" width="5" height="14" rx="1" fill="currentColor"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave -->
+    <div class="wave-divider">
+      <svg viewBox="0 0 1200 14" preserveAspectRatio="none">
+        <path d="M0,7 C150,0 300,14 600,7 C900,0 1050,14 1200,7 L1200,14 L0,14 Z" fill="#fff"/>
+      </svg>
+    </div>
+
+    <div class="layout">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          フォルダ
+        </div>
+
+        <div class="sidebar-folder active">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>ブックマークバー</span>
+        </div>
+        <div class="sidebar-folder indent1">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>デザインリソース</span>
+        </div>
+        <div class="sidebar-folder indent1">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>開発ツール</span>
+        </div>
+        <div class="sidebar-folder">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>仕事</span>
+        </div>
+        <div class="sidebar-folder indent1">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>ドキュメント</span>
+        </div>
+        <div class="sidebar-folder">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>個人プロジェクト</span>
+        </div>
+        <div class="sidebar-folder">
+          <svg class="folder-svg" width="14" height="14" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+          <span>あとで読む</span>
+        </div>
+
+        <div style="flex:1;"></div>
+        <div class="btn-sidebar">+ 新しいフォルダ</div>
+      </div>
+
+      <!-- Main -->
+      <div class="main-content">
+        <div class="breadcrumb">
+          <span class="breadcrumb-link">すべて</span>
+          <span class="breadcrumb-sep">&#8250;</span>
+          <span class="breadcrumb-current">ブックマークバー</span>
+        </div>
+
+        <div class="bookmark-list">
+          <!-- Folders first -->
+          <div class="bookmark-item drag-over">
+            <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg></span>
+            <span class="bm-title">デザインリソース</span>
+            <span class="item-count">3</span>
+          </div>
+          <div class="bookmark-item">
+            <span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="#F5DF4D"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg></span>
+            <span class="bm-title">開発ツール</span>
+            <span class="item-count">7</span>
+          </div>
+
+          <!-- Bookmarks -->
+          <div class="bookmark-item">
+            <img class="favicon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%234285F4'/><text x='8' y='12' text-anchor='middle' fill='white' font-size='11' font-family='Arial'>G</text></svg>">
+            <div class="bm-info">
+              <span class="bm-title">Google</span>
+              <span class="bm-url">https://www.google.com</span>
+            </div>
+          </div>
+          <div class="bookmark-item hovered">
+            <img class="favicon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%23333'/><text x='8' y='12' text-anchor='middle' fill='white' font-size='11' font-family='Arial'>G</text></svg>">
+            <div class="bm-info">
+              <span class="bm-title">GitHub</span>
+              <span class="bm-url">https://github.com</span>
+            </div>
+          </div>
+          <div class="bookmark-item">
+            <img class="favicon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%23FF6600'/><text x='8' y='12' text-anchor='middle' fill='white' font-size='10' font-family='Arial'>Y</text></svg>">
+            <div class="bm-info">
+              <span class="bm-title">Hacker News</span>
+              <span class="bm-url">https://news.ycombinator.com</span>
+            </div>
+          </div>
+          <div class="bookmark-item">
+            <img class="favicon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%235865F2'/><text x='8' y='12' text-anchor='middle' fill='white' font-size='9' font-family='Arial'>D</text></svg>">
+            <div class="bm-info">
+              <span class="bm-title">Discord</span>
+              <span class="bm-url">https://discord.com/channels/@me</span>
+            </div>
+          </div>
+          <div class="bookmark-item">
+            <img class="favicon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%231DA1F2'/><text x='8' y='12' text-anchor='middle' fill='white' font-size='10' font-family='Arial'>X</text></svg>">
+            <div class="bm-info">
+              <span class="bm-title">X (Twitter)</span>
+              <span class="bm-url">https://x.com/home</span>
+            </div>
+          </div>
+          <div class="bookmark-item">
+            <img class="favicon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%23E4405F'/><text x='8' y='12' text-anchor='middle' fill='white' font-size='9' font-family='Arial'>N</text></svg>">
+            <div class="bm-info">
+              <span class="bm-title">Notion - The all-in-one workspace</span>
+              <span class="bm-url">https://www.notion.so</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Context menu overlay -->
+        <div class="context-menu" style="right:180px; top:280px;">
+          <button>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            開く
+          </button>
+          <button>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8m-4-4h8"/></svg>
+            新しいタブで開く
+          </button>
+          <hr>
+          <button class="hovered">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            編集
+          </button>
+          <button>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+            移動
+          </button>
+          <hr>
+          <button class="danger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            削除
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

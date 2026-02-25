@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Docking Feature — Bookmark Manager+</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+html, body { margin:0; padding:0; min-height:100vh; background:#1a1a2e; font-family:'Montserrat',-apple-system,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
+
+:root {
+  --yellow: #F5DF4D; --yellow-light: #FDF8D4; --yellow-glow: rgba(245,223,77,0.25);
+  --gray: #939597; --gray-subtle: #E8E8EA;
+  --bg-primary: #FFFFFF; --bg-sidebar: #F0F0F2;
+  --text-primary: #333333; --text-muted: #999;
+  --border: #E0E0E2; --border-light: #ECECEE;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-pill: 50px;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 40px 80px;
+}
+
+/* Title */
+.hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,223,77,0.15);
+  border: 1px solid rgba(245,223,77,0.25);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--yellow);
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.hero h1 .yellow { color: var(--yellow); text-decoration: underline; text-decoration-color: rgba(245,223,77,0.4); text-underline-offset: 4px; }
+
+.hero p {
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 400;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Dock showcase grid */
+.dock-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.dock-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: all 200ms ease;
+}
+.dock-card:hover { border-color: rgba(245,223,77,0.3); background:rgba(255,255,255,0.06); }
+
+.dock-card.featured {
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  text-align: left;
+  padding: 32px 40px;
+  background: linear-gradient(135deg, rgba(245,223,77,0.08) 0%, rgba(255,255,255,0.04) 100%);
+  border-color: rgba(245,223,77,0.2);
+}
+
+.dock-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.dock-card .desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Monitor mockup */
+.monitor {
+  width: 180px;
+  height: 120px;
+  background: #0d0d1a;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  position: relative;
+  margin: 16px auto;
+  overflow: hidden;
+}
+.monitor::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+}
+
+.monitor-large {
+  width: 280px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+/* Window positions */
+.win {
+  position: absolute;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.win-header {
+  height: 8px;
+  background: linear-gradient(135deg, var(--yellow-light) 0%, #f7f7f8 100%);
+  position: relative;
+}
+.win-header::after {
+  content: '';
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  width: 4px;
+  height: 4px;
+  background: var(--yellow);
+  border-radius: 50%;
+}
+.win-body {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+}
+.win-sidebar {
+  width: 20%;
+  background: var(--bg-sidebar);
+  border-radius: 1px;
+  min-height: 100%;
+}
+.win-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.win-line {
+  height: 3px;
+  background: var(--gray-subtle);
+  border-radius: 1px;
+}
+.win-line.yellow { background: var(--yellow); opacity: 0.6; }
+
+/* Left */
+.win-left { left:0; top:0; width:35%; height:100%; }
+/* Right */
+.win-right { right:0; top:0; width:35%; height:100%; }
+/* Top */
+.win-top { left:0; top:0; width:100%; height:40%; }
+/* Bottom */
+.win-bottom { left:0; bottom:0; width:100%; height:40%; }
+/* Center */
+.win-center { left:15%; top:12%; width:70%; height:76%; }
+
+/* Ghost chrome window */
+.chrome-ghost {
+  position: absolute;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 3px;
+}
+
+/* Feature info */
+.featured-info { flex:1; }
+.featured-info h3 { font-size:20px; margin-bottom:12px; }
+.featured-info .desc { font-size:14px; line-height:1.6; }
+
+.feature-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+.tag-yellow { background: rgba(245,223,77,0.15); color: var(--yellow); }
+.tag-gray { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      Bookmark Manager+
+    </div>
+    <h1>画面の好きな位置に<span class="yellow">ドッキング</span></h1>
+    <p>上下左右・中央の5パターンから選んで、ワンクリックで固定配置。設定は自動保存。</p>
+  </div>
+
+  <!-- Featured card -->
+  <div class="dock-grid">
+    <div class="dock-card featured">
+      <div class="monitor monitor-large">
+        <!-- Chrome ghost -->
+        <div class="chrome-ghost" style="left:38%; top:5%; width:58%; height:90%;"></div>
+        <!-- Manager window docked left -->
+        <div class="win win-left">
+          <div class="win-header"></div>
+          <div class="win-body" style="height:calc(100% - 8px);">
+            <div class="win-sidebar"></div>
+            <div class="win-content" style="padding:3px;">
+              <div class="win-line yellow" style="width:60%;"></div>
+              <div class="win-line" style="width:90%;"></div>
+              <div class="win-line" style="width:80%;"></div>
+              <div class="win-line" style="width:85%;"></div>
+              <div class="win-line" style="width:70%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="featured-info">
+        <h3>Chromeの横で並べて使える</h3>
+        <div class="desc">ブックマーク管理ウィンドウを画面端に固定すれば、Chromeと並べて作業できます。ブラウジングしながらブックマークを整理 — もう別タブに切り替える必要はありません。</div>
+        <div class="feature-tags">
+          <span class="tag tag-yellow">自動保存</span>
+          <span class="tag tag-yellow">5パターン</span>
+          <span class="tag tag-gray">chrome.system.display API</span>
+          <span class="tag tag-gray">Manifest V3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left -->
+    <div class="dock-card">
+      <div class="monitor">
+        <div class="chrome-ghost" style="left:38%;top:5%;width:58%;height:90%;"></div>
+        <div class="win win-left">
+          <div class="win-header"></div>
+          <div class="win-body" style="height:calc(100% - 8px);"><div class="win-sidebar"></div><div class="win-content" style="padding:2px;"><div class="win-line yellow" style="width:50%;"></div><div class="win-line" style="width:80%;"></div><div class="win-line" style="width:70%;"></div></div></div>
+        </div>
+      </div>
+      <h3>左端</h3>
+      <div class="desc">幅30% x 高さ100%<br>サイドバー感覚で使える</div>
+    </div>
+
+    <!-- Top -->
+    <div class="dock-card">
+      <div class="monitor">
+        <div class="chrome-ghost" style="left:5%;top:44%;width:90%;height:52%;"></div>
+        <div class="win win-top">
+          <div class="win-header"></div>
+          <div class="win-body" style="height:calc(100% - 8px);"><div class="win-sidebar"></div><div class="win-content" style="padding:2px;"><div class="win-line yellow" style="width:40%;"></div><div class="win-line" style="width:90%;"></div><div class="win-line" style="width:75%;"></div></div></div>
+        </div>
+      </div>
+      <h3>上端</h3>
+      <div class="desc">幅100% x 高さ45%<br>横長レイアウトで一覧性◎</div>
+    </div>
+
+    <!-- Center -->
+    <div class="dock-card">
+      <div class="monitor">
+        <div class="win win-center">
+          <div class="win-header"></div>
+          <div class="win-body" style="height:calc(100% - 8px);"><div class="win-sidebar"></div><div class="win-content" style="padding:2px;"><div class="win-line yellow" style="width:50%;"></div><div class="win-line" style="width:85%;"></div><div class="win-line" style="width:70%;"></div></div></div>
+        </div>
+      </div>
+      <h3>中央</h3>
+      <div class="desc">幅50% x 高さ65%<br>デフォルト。集中管理モード</div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="dock-card">
+      <div class="monitor">
+        <div class="chrome-ghost" style="left:5%;top:5%;width:90%;height:52%;"></div>
+        <div class="win win-bottom">
+          <div class="win-header"></div>
+          <div class="win-body" style="height:calc(100% - 8px);"><div class="win-sidebar"></div><div class="win-content" style="padding:2px;"><div class="win-line yellow" style="width:40%;"></div><div class="win-line" style="width:90%;"></div><div class="win-line" style="width:75%;"></div></div></div>
+        </div>
+      </div>
+      <h3>下端</h3>
+      <div class="desc">幅100% x 高さ45%<br>下部ツールバー的な使い方</div>
+    </div>
+
+    <!-- Right -->
+    <div class="dock-card">
+      <div class="monitor">
+        <div class="chrome-ghost" style="left:5%;top:5%;width:58%;height:90%;"></div>
+        <div class="win win-right">
+          <div class="win-header"></div>
+          <div class="win-body" style="height:calc(100% - 8px);"><div class="win-sidebar"></div><div class="win-content" style="padding:2px;"><div class="win-line yellow" style="width:50%;"></div><div class="win-line" style="width:80%;"></div><div class="win-line" style="width:70%;"></div></div></div>
+        </div>
+      </div>
+      <h3>右端</h3>
+      <div class="desc">幅30% x 高さ100%<br>リファレンスパネルとして</div>
+    </div>
+
+    <!-- Placeholder for symmetry -->
+    <div class="dock-card" style="border-color:transparent; background:transparent;">
+    </div>
+  </div>
+</div>
+</body>
+</html>
