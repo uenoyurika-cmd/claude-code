@@ -8,12 +8,22 @@
 </head>
 <body>
   <div class="container">
-    <h1>Meta提案拡張機能</h1>
-    <p class="subtitle">SEO最適化 Title / Description 提案ツール</p>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="34" height="34" rx="2" stroke="#EC2D44" stroke-width="1.5" fill="none"/>
+          <path d="M8 28V8L14 20L18 12L22 20L28 8V28" stroke="#EC2D44" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <h1><strong>Meta</strong> 提案拡張機能</h1>
+    </div>
+    <p class="subtitle">SEO Title / Description Optimizer</p>
 
     <!-- Step 1: API Key設定 -->
     <section class="section" id="section-settings">
-      <h2>1. OpenAI API Key 設定</h2>
+      <h2><span class="step-number">1</span>OpenAI API Key 設定</h2>
       <div class="input-group">
         <input type="password" id="apiKey" placeholder="sk-..." />
         <button id="saveApiKey" class="btn btn-secondary">保存</button>
@@ -23,9 +33,9 @@
 
     <!-- Step 2: サイトマップ取得 -->
     <section class="section" id="section-sitemap">
-      <h2>2. サイトマップ / ページ一覧取得</h2>
+      <h2><span class="step-number">2</span>サイトマップ / ページ一覧取得</h2>
       <div class="input-group">
-        <input type="text" id="sitemapUrl" placeholder="https://example.com/sitemap.xml または CMS URL" />
+        <input type="text" id="sitemapUrl" placeholder="https://example.com/sitemap.xml" />
       </div>
       <div class="btn-group">
         <button id="fetchSitemap" class="btn btn-primary">サイトマップから取得</button>
@@ -36,7 +46,7 @@
 
     <!-- Step 3: ページ一覧 & TD取得 -->
     <section class="section" id="section-pages">
-      <h2>3. ページ一覧 / Title・Description 取得</h2>
+      <h2><span class="step-number">3</span>ページ一覧 / Title・Description 取得</h2>
       <div class="table-wrapper">
         <table id="pagesTable">
           <thead>
@@ -52,14 +62,14 @@
         </table>
       </div>
       <p class="page-count">検出ページ数: <span id="pageCount">0</span></p>
-      <button id="fetchMeta" class="btn btn-primary" disabled>選択ページのTD取得</button>
+      <button id="fetchMeta" class="btn btn-primary" disabled>選択ページの TD 取得</button>
       <p class="status" id="metaStatus"></p>
     </section>
 
     <!-- Step 4: AI提案 -->
     <section class="section" id="section-ai">
-      <h2>4. AI によるTD改善提案</h2>
-      <button id="generateSuggestions" class="btn btn-accent" disabled>AI提案を生成</button>
+      <h2><span class="step-number">4</span>AI による TD 改善提案</h2>
+      <button id="generateSuggestions" class="btn btn-accent" disabled>AI 提案を生成</button>
       <div id="progressBar" class="progress-bar" style="display:none;">
         <div id="progressFill" class="progress-fill"></div>
         <span id="progressText">0%</span>
@@ -69,7 +79,7 @@
 
     <!-- Step 5: 結果 & CSV -->
     <section class="section" id="section-results">
-      <h2>5. 結果 / CSV書き出し</h2>
+      <h2><span class="step-number">5</span>結果 / CSV 書き出し</h2>
       <div class="table-wrapper">
         <table id="resultsTable">
           <thead>
@@ -77,8 +87,8 @@
               <th>URL</th>
               <th>現在のTitle</th>
               <th>提案Title</th>
-              <th>現在のDescription</th>
-              <th>提案Description</th>
+              <th>現在のDesc</th>
+              <th>提案Desc</th>
               <th>改善ポイント</th>
             </tr>
           </thead>
@@ -86,8 +96,9 @@
           </tbody>
         </table>
       </div>
-      <button id="exportCsv" class="btn btn-accent" disabled>CSV書き出し</button>
+      <button id="exportCsv" class="btn btn-accent" disabled>CSV 書き出し</button>
     </section>
+
   </div>
 
   <script src="popup.js"></script>
