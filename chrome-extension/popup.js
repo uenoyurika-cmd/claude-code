@@ -148,6 +148,9 @@ let priceList = [];
 let pricingRules = {};
 let priceFilterCategory = "all";
 
+// Plan summaries state
+let planSummaries = { matsu: null, take: null, ume: null };
+
 // ===== DOM Elements =====
 const $ = (id) => document.getElementById(id);
 
@@ -161,8 +164,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("apiKeyStatus").className = "status success";
   }
 
+  // Load saved GAS URL
+  const storedGas = await chrome.storage.local.get("gasUrl");
+  if (storedGas.gasUrl) {
+    $("gasUrl").value = storedGas.gasUrl;
+    setStatus("gasUrlStatus", "GAS URL 設定済み", "success");
+  }
+
   // Shared
   $("saveApiKey").addEventListener("click", saveApiKey);
+  $("saveGasUrl").addEventListener("click", saveGasUrl);
 
   // Mode selection
   $("modeCardTd").addEventListener("click", () => selectMode("td"));
@@ -206,6 +217,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("ruleDirectionFeeLarge").addEventListener("change", () => { pricingRules.directionFeeRateLarge = Number($("ruleDirectionFeeLarge").value) || 25; });
   $("ruleHourlyRate").addEventListener("change", () => { pricingRules.hourlyRate = Number($("ruleHourlyRate").value) || 13500; });
   $("ruleJsBase").addEventListener("change", () => { pricingRules.jsPartsDirectionFee = Number($("ruleJsBase").value) || 15000; });
+
+  // Google Slides export
+  $("exportSlides").addEventListener("click", exportToGoogleSlides);
 });
 
 // ===== Mode Selection =====
@@ -592,23 +606,28 @@ async function generateEstimate() {
     const prompt = buildEstimatePrompt(pageList, selected.length, isNewPages);
     const result = await callOpenAIRaw(apiKey, prompt);
 
-    // Parse the result — expecting { matsu: [...], take: [...], ume: [...] }
-    if (result.matsu) {
-      result.matsu.forEach((item) => addEstimateItemFromAI("matsu", item));
-    }
-    if (result.take) {
-      result.take.forEach((item) => addEstimateItemFromAI("take", item));
-    }
-    if (result.ume) {
-      result.ume.forEach((item) => addEstimateItemFromAI("ume", item));
-    }
+    // Parse the result — expecting { matsu: { summary, sellingPoints, items }, ... }
+    planSummaries = { matsu: null, take: null, ume: null };
+    ["matsu", "take", "ume"].forEach((tier) => {
+      if (!result[tier]) return;
+      const plan = result[tier];
+      if (Array.isArray(plan)) {
+        // Backwards compatibility: old format was just an array
+        plan.forEach((item) => addEstimateItemFromAI(tier, item));
+      } else {
+        planSummaries[tier] = { summary: plan.summary || "", sellingPoints: plan.sellingPoints || [] };
+        (plan.items || []).forEach((item) => addEstimateItemFromAI(tier, item));
+      }
+    });
 
     $("estProgressFill").style.width = "100%";
     $("estProgressText").textContent = "完了";
 
     renderEstimateTable();
     updateEstimateTotals();
+    renderPlanSummaries();
     $("exportEstimateCsv").disabled = false;
+    $("exportSlides").disabled = false;
     setStatus("estAiStatus", `松竹梅 ${estimateItems.length} 項目の見積もりを生成しました`, "success");
   } catch (e) {
     setStatus("estAiStatus", `生成エラー: ${e.message}`, "error");
@@ -643,15 +662,19 @@ ${priceRef}
 - CSS少: 既存パーツ中心 / CSS中: CSSの調整あり / CSS多: CSSの作り込みが多い
 - W: ライティング込み
 
-以下のJSON形式で回答してください。各プランに複数の作業項目を含めてください。
+以下のJSON形式で回答してください。各プランに概要・セールスポイント・作業項目を含めてください。
 金額は上記の自社単価表に基づき、日本円で設定してください。単価表にない項目は相場に基づいて見積もってください。
 
 {
-  "matsu": [
-    { "category": "カテゴリ名", "item": "作業項目名", "description": "具体的な作業内容の説明", "quantity": 数量, "unitPrice": 単価 }
-  ],
-  "take": [ ... ],
-  "ume": [ ... ]
+  "matsu": {
+    "summary": "プランの概要説明（1〜2文で、このプランの特徴と得られる成果を説明）",
+    "sellingPoints": ["セールスポイント1", "セールスポイント2", "セールスポイント3（3〜5個）"],
+    "items": [
+      { "category": "カテゴリ名", "item": "作業項目名", "description": "具体的な作業内容の説明", "quantity": 数量, "unitPrice": 単価 }
+    ]
+  },
+  "take": { "summary": "...", "sellingPoints": [...], "items": [...] },
+  "ume": { "summary": "...", "sellingPoints": [...], "items": [...] }
 }
 
 【各プランの方針】
@@ -797,6 +820,113 @@ function updateEstimateTotals() {
   $("totalMatsu").textContent = formatYen(totals.matsu);
   $("totalTake").textContent = formatYen(totals.take);
   $("totalUme").textContent = formatYen(totals.ume);
+  renderPlanSummaries();
+}
+
+// ===== Plan Summaries =====
+function renderPlanSummaries() {
+  const container = $("planSummaries");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const tierInfo = {
+    matsu: { label: "松（プレミアム）", badgeClass: "badge-matsu", char: "松" },
+    take: { label: "竹（スタンダード）", badgeClass: "badge-take", char: "竹" },
+    ume: { label: "梅（ライト）", badgeClass: "badge-ume", char: "梅" },
+  };
+
+  const totals = { matsu: 0, take: 0, ume: 0 };
+  estimateItems.forEach((item) => {
+    if (totals[item.tier] !== undefined) totals[item.tier] += item.quantity * item.unitPrice;
+  });
+
+  let hasAny = false;
+  ["matsu", "take", "ume"].forEach((tier) => {
+    const info = tierInfo[tier];
+    const summary = planSummaries[tier];
+    if (!summary) return;
+    hasAny = true;
+
+    const card = document.createElement("div");
+    card.className = "plan-summary-card";
+    card.innerHTML = `
+      <div class="plan-summary-header">
+        <span class="badge ${info.badgeClass}">${info.char}</span>
+        <span class="plan-summary-title">${escapeHtml(info.label)}</span>
+        <span class="plan-summary-price">${formatYen(totals[tier])}</span>
+      </div>
+      <p class="plan-summary-text">${escapeHtml(summary.summary)}</p>
+      <ul class="plan-summary-points">
+        ${summary.sellingPoints.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}
+      </ul>
+    `;
+    container.appendChild(card);
+  });
+
+  container.style.display = hasAny ? "" : "none";
+}
+
+// ===== GAS URL 保存 =====
+async function saveGasUrl() {
+  const url = $("gasUrl").value.trim();
+  if (!url) {
+    setStatus("gasUrlStatus", "GAS URL を入力してください", "error");
+    return;
+  }
+  await chrome.storage.local.set({ gasUrl: url });
+  setStatus("gasUrlStatus", "GAS URL を保存しました", "success");
+}
+
+// ===== Google Slides 出力 =====
+async function exportToGoogleSlides() {
+  const stored = await chrome.storage.local.get("gasUrl");
+  const gasUrl = stored.gasUrl;
+
+  if (!gasUrl) {
+    setStatus("estAiStatus", "Googleスライド出力には GAS URL の設定が必要です（Step 1 で設定）", "error");
+    return;
+  }
+
+  if (estimateItems.length === 0) {
+    setStatus("estAiStatus", "見積もりデータがありません", "error");
+    return;
+  }
+
+  $("exportSlides").disabled = true;
+  setStatus("estAiStatus", "Google スライドを作成中...");
+
+  const totals = { matsu: 0, take: 0, ume: 0 };
+  estimateItems.forEach((item) => {
+    if (totals[item.tier] !== undefined) totals[item.tier] += item.quantity * item.unitPrice;
+  });
+
+  const payload = {
+    action: "createSlides",
+    planSummaries,
+    items: estimateItems,
+    totals,
+    date: new Date().toLocaleDateString("ja-JP"),
+  };
+
+  try {
+    const response = await fetch(gasUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload),
+      redirect: "follow",
+    });
+    const result = await response.json();
+    if (result.success && result.url) {
+      window.open(result.url, "_blank");
+      setStatus("estAiStatus", "Google スライドを作成しました", "success");
+    } else {
+      throw new Error(result.error || "スライド作成に失敗しました");
+    }
+  } catch (e) {
+    setStatus("estAiStatus", `スライド作成エラー: ${e.message}`, "error");
+  }
+
+  $("exportSlides").disabled = false;
 }
 
 // ===== Export Estimate CSV =====
@@ -824,6 +954,18 @@ function exportEstimateCsv() {
   rows.push(["", "", "", "", "", "松 合計", totals.matsu]);
   rows.push(["", "", "", "", "", "竹 合計", totals.take]);
   rows.push(["", "", "", "", "", "梅 合計", totals.ume]);
+
+  // Plan summaries
+  const tierLabels = { matsu: "松（プレミアム）", take: "竹（スタンダード）", ume: "梅（ライト）" };
+  ["matsu", "take", "ume"].forEach((tier) => {
+    const s = planSummaries[tier];
+    if (!s) return;
+    rows.push([]);
+    rows.push([tierLabels[tier], "概要", s.summary, "", "", "", ""]);
+    (s.sellingPoints || []).forEach((p, i) => {
+      rows.push(["", `セールスポイント${i + 1}`, p, "", "", "", ""]);
+    });
+  });
 
   downloadCsv(`site_estimate_${formatDate()}.csv`, headers, rows);
 }

@@ -705,6 +705,90 @@ input[type="checkbox"]:checked::after {
   color: rgba(74, 26, 31, 0.6);
 }
 
+/* ===== Plan Summary Cards ===== */
+.plan-summaries {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.plan-summary-card {
+  border: 1.5px solid rgba(236, 45, 68, 0.15);
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  transition: box-shadow 0.2s;
+}
+
+.plan-summary-card:hover {
+  box-shadow: 0 4px 16px rgba(236, 45, 68, 0.1);
+}
+
+.plan-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(236, 45, 68, 0.1);
+}
+
+.plan-summary-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4A1A1F;
+  flex: 1;
+}
+
+.plan-summary-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #EC2D44;
+}
+
+.plan-summary-text {
+  font-size: 12px;
+  color: rgba(74, 26, 31, 0.7);
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+
+.plan-summary-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plan-summary-points li {
+  font-size: 11px;
+  color: rgba(74, 26, 31, 0.6);
+  padding: 3px 0 3px 16px;
+  position: relative;
+  line-height: 1.55;
+}
+
+.plan-summary-points li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: #EC2D44;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* ===== Google Slides Button ===== */
+.btn-slides {
+  background: #0F9D58;
+  color: #FFFFFF;
+  border-color: #0F9D58;
+}
+
+.btn-slides:hover:not(:disabled) {
+  background: #0B8043;
+  border-color: #0B8043;
+}
+
 /* ===== Divider line ===== */
 .divider {
   height: 1px;

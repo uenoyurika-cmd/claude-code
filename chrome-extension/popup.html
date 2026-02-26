@@ -29,6 +29,13 @@
         <button id="saveApiKey" class="btn btn-secondary">保存</button>
       </div>
       <p class="status" id="apiKeyStatus"></p>
+
+      <div class="input-group" style="margin-top:14px;">
+        <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/..." />
+        <button id="saveGasUrl" class="btn btn-secondary">保存</button>
+      </div>
+      <p class="hint">Google スライド出力用の GAS Web App URL（オプション）</p>
+      <p class="status" id="gasUrlStatus"></p>
     </section>
 
     <!-- Step 2: モード選択 -->
@@ -248,6 +255,9 @@
       <section class="section" id="section-est-result">
         <h2><span class="step-number">5</span>見積もり調整 / エクスポート</h2>
 
+        <!-- プラン概要カード -->
+        <div id="planSummaries" class="plan-summaries" style="display:none;"></div>
+
         <!-- プラン切替タブ -->
         <div class="tier-tabs">
           <button class="tier-tab active" data-tier="all">全プラン</button>
@@ -297,6 +307,7 @@
         <!-- アクション -->
         <div class="btn-group" style="margin-top:14px;">
           <button id="exportEstimateCsv" class="btn btn-accent" disabled>見積もり CSV 書き出し</button>
+          <button id="exportSlides" class="btn btn-slides" disabled>Google スライド作成</button>
           <button id="addEstimateRow" class="btn btn-primary">行を追加</button>
         </div>
       </section>
