@@ -387,7 +387,7 @@
     <p class="lead">
       ferret One のページを AI が分析し、TD 改善提案や<br>
       松竹梅の見積もりを自動生成する Chrome 拡張機能です。<br>
-      自社単価表に基づいた正確な見積もり作成も可能です。
+      プラン概要の自動整理から Google スライド提案書の生成まで対応。
     </p>
   </header>
 
@@ -402,6 +402,7 @@
         <li><strong>SEO の改善ポイントが</strong> 分からず、何を直せばいいか判断に迷う</li>
         <li><strong>見積もり作成に時間がかかる</strong> ページ構成に応じた松竹梅の提案を手作業で作るのは非効率</li>
         <li><strong>単価の計算ミスが不安</strong> 自社の複雑な料金表を手動で参照して見積もるため、ミスが起こりやすい</li>
+        <li><strong>提案書の作成に手間がかかる</strong> 見積もりデータをスライドに手作業で整形する時間がもったいない</li>
       </ul>
     </div>
   </div>
@@ -425,7 +426,7 @@
         <div class="benefit-card">
           <div class="benefit-num">3</div>
           <h3>松竹梅の見積もり自動作成</h3>
-          <p>AIがサイト構成を分析し、プレミアム・スタンダード・ライトの3プランの見積もりを自動生成</p>
+          <p>AIがサイト構成を分析し、プレミアム・スタンダード・ライトの3プランの見積もりとプラン概要・セールスポイントを自動生成</p>
         </div>
         <div class="benefit-card">
           <div class="benefit-num">4</div>
@@ -436,6 +437,11 @@
           <div class="benefit-num">5</div>
           <h3>CSV 一括書き出し</h3>
           <p>TD提案も見積もりもExcel対応のCSVで出力。そのまま共有・レビュー・提案書作成に使えます</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">6</div>
+          <h3>Google スライド提案書を自動生成</h3>
+          <p>松竹梅の見積もり・プラン概要・セールスポイントを盛り込んだ顧客向け提案書を Google スライドでワンクリック生成</p>
         </div>
       </div>
     </div>
@@ -493,7 +499,7 @@
           <div class="step-body">
             <h3>AI 提案を生成</h3>
             <p>TD改善モードでは各ページの改善案を、見積もりモードでは松竹梅3プランの見積もりを AI が自動生成。<br>
-            見積もり結果は数量・単価を手動で調整でき、項目の追加・削除も可能です。</p>
+            各プランの概要・セールスポイントも自動でまとめられ、見積もり結果は手動で調整も可能です。</p>
           </div>
         </div>
         <div class="step-connector"></div>
@@ -504,6 +510,16 @@
             <h3>CSV で書き出し</h3>
             <p>TD改善案や見積もりの結果を CSV でダウンロード。<br>
             Excel で開いてチームレビューや提案書作成にそのまま活用できます。</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+
+        <div class="step">
+          <div class="step-marker">7</div>
+          <div class="step-body">
+            <h3>Google スライド提案書を生成</h3>
+            <p>「Google スライド作成」ボタンをクリックするだけで、松竹梅の比較表・明細・セールスポイントを盛り込んだ<br>
+            デザイン済みの顧客向け提案書が Google スライドに自動生成されます。</p>
           </div>
         </div>
 
@@ -530,7 +546,12 @@
         <div class="usecase">
           <span class="usecase-tag">提案資料</span>
           <h3>クライアントへの改善提案</h3>
-          <p>TD改善案のCSVや松竹梅見積もりCSVをそのまま提案書に活用。デザイン・UX・SEO等の包括的な改善案も含め、説得力のある資料を作成。</p>
+          <p>TD改善案のCSVや松竹梅見積もりをそのまま提案書に活用。Google スライドで顧客向け提案書を自動生成し、そのまま商談で活用可能。</p>
+        </div>
+        <div class="usecase">
+          <span class="usecase-tag">スライド提案</span>
+          <h3>Google スライドで即提案</h3>
+          <p>松竹梅の比較表・明細・プラン概要・セールスポイントを盛り込んだ提案書をワンクリックで自動生成。資料作成の時間をゼロに。</p>
         </div>
         <div class="usecase">
           <span class="usecase-tag">新規制作</span>
@@ -622,20 +643,36 @@
         <div class="faq-q">見積もりの金額は手動で調整できますか？</div>
         <p class="faq-a">はい。AI が生成した見積もりの数量・単価はすべて編集可能です。項目の追加・削除もでき、小計と合計はリアルタイムで再計算されます。最終的な調整後にCSV書き出しが可能です。</p>
       </div>
+
+      <div class="faq-item">
+        <div class="faq-q">プラン概要やセールスポイントとは何ですか？</div>
+        <p class="faq-a">AI が松竹梅の各プランについて、提案の概要（どのような改善を行うか）とセールスポイント（そのプランを選ぶメリット）を自動で生成します。見積もり画面上部に3カラムのカードで表示され、プランの違いが一目で分かります。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Google スライドの提案書はどうやって作成しますか？</div>
+        <p class="faq-a">見積もり生成後に「Google スライド作成」ボタンをクリックするだけです。事前に GAS（Google Apps Script）の Web App URL を設定しておく必要があります。タイトル・プラン比較・各プラン明細・合計比較の6枚構成の提案書が自動で作成され、Google ドライブに保存されます。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">GAS Web App URL とは何ですか？</div>
+        <p class="faq-a">Google Apps Script で作成したウェブアプリの URL です。スライド生成機能を使うには、同梱の gas/Code.gs を Google Apps Script にデプロイし、そのウェブアプリ URL を拡張機能の設定画面に入力してください。デプロイ手順は gas/Code.gs のコメントに記載されています。</p>
+      </div>
     </div>
   </div>
 
   <!-- ===== CTA ===== -->
   <div class="cta">
     <h2>さっそく使ってみましょう</h2>
-    <p>導入は 5 分で完了。TD改善も見積もり作成も、AIがまとめて自動化します。</p>
+    <p>導入は 5 分で完了。TD改善も見積もり作成も Google スライド提案書も、AIがまとめて自動化します。</p>
     <a href="https://drive.google.com/drive/folders/1Fb8bnp_lW5e6Pqz0qlfGiHBRgkV23JGK" target="_blank" rel="noopener" class="cta-btn" style="text-decoration:none;">共有ドライブからダウンロード</a>
   </div>
 
   <!-- ===== Footer ===== -->
   <footer>
-    Meta提案拡張機能 v2.0.0 — 社内ツール
+    Meta提案拡張機能 v2.1.0 — 社内ツール
   </footer>
+
 
 
 </body>
