@@ -50,21 +50,23 @@ function doPost(e) {
 //  Google スライド提案書 生成
 // =========================================================
 
-// ===== PANTONE 2021 — Illuminating Yellow × Ultimate Gray =====
+// ===== Tech Blue — Clean Flat Design =====
 var COLORS_ = {
-  PRIMARY: '#F5DF4D',       // Illuminating Yellow — CTA, active, accent
-  PRIMARY_10: '#FBF5D2',    // Yellow 10% for light backgrounds
-  PRIMARY_15: '#F9F0C0',    // Yellow 15% for hover/glow
-  SECONDARY: '#939597',     // Ultimate Gray — sub text, borders
-  DARK: '#333333',          // Main text
-  SUB: '#666666',           // Sub text
-  MUTED: '#999999',         // Muted text
+  PRIMARY: '#0052FF',        // Royal Blue — accent, CTA, highlights
+  PRIMARY_LIGHT: '#E8EFFE',  // Blue 10% — light card backgrounds
+  PRIMARY_MID: '#CCE0FF',    // Blue 20% — selling point badges
+  GRADIENT_START: '#003BCC', // Dark blue gradient start
+  GRADIENT_END: '#007BFF',   // Light blue gradient end
+  DARK: '#1A202C',           // Deep navy gray — main headings
+  SUB: '#718096',            // Medium gray — body, subtitles
+  MUTED: '#A0AEC0',         // Light gray — hints
   WHITE: '#FFFFFF',
-  BG_SIDE: '#F0F0F2',      // Sidebar / secondary
-  BG_SEC: '#F7F7F8',       // Secondary background
-  MATSU_BG: '#FBF5D2', MATSU: '#8B7A2B',  // Gold-yellow tone
-  TAKE_BG: '#F0F0F2',  TAKE: '#555555',   // Gray tone
-  UME_BG: '#F7F7F8',   UME: '#777777',    // Light gray tone
+  BG_SEC: '#F4F7FA',         // Very light gray-blue — section bg
+  CARD_BG: '#FFFFFF',        // Card background
+  SHADOW: '#0052FF14',       // Blue shadow 8%
+  MATSU_BG: '#E8EFFE', MATSU: '#003BCC',  // Deep blue
+  TAKE_BG: '#F0F4F8',  TAKE: '#2D3748',   // Dark slate
+  UME_BG: '#F4F7FA',   UME: '#4A5568',    // Gray-blue
 };
 
 var TIERS_ = {
@@ -77,24 +79,31 @@ function createProposalSlides_(data) {
   var dateStr = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
   var pres = SlidesApp.create('サイト改善提案書_' + dateStr);
 
-  // ---------- Slide 1: Title ----------
+  // ---------- Slide 1: Title (Hero — Blue gradient feel) ----------
   var s1 = pres.getSlides()[0];
-  s1.getBackground().setSolidFill(COLORS_.BG_SEC);
+  s1.getBackground().setSolidFill(COLORS_.PRIMARY);
   clearSlide_(s1);
-  // Accent line at top
-  addRect_(s1, 0, 0, 720, 6, COLORS_.PRIMARY);
-  addText_(s1, 'サイト改善\n提案書', 80, 80, 560, 200, COLORS_.DARK, 44, true, 'CENTER');
-  addRect_(s1, 280, 290, 160, 4, COLORS_.PRIMARY);
-  addText_(s1, Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy年MM月dd日'), 80, 310, 560, 40, COLORS_.SUB, 18, false, 'CENTER');
+  // Geometric accent bar (lighter blue strip at bottom)
+  addRect_(s1, 0, 360, 720, 45, COLORS_.GRADIENT_END);
+  addRect_(s1, 0, 395, 720, 10, COLORS_.GRADIENT_START);
+  // Title
+  addText_(s1, 'サイト改善\n提案書', 80, 60, 560, 200, COLORS_.WHITE, 48, true, 'CENTER');
+  // Thin separator line
+  addRect_(s1, 260, 270, 200, 3, COLORS_.WHITE);
+  // Date & subtitle
+  addText_(s1, Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy年MM月dd日'), 80, 290, 560, 36, COLORS_.PRIMARY_LIGHT, 18, false, 'CENTER');
+  addText_(s1, 'Web Site Improvement Proposal', 80, 326, 560, 24, COLORS_.PRIMARY_MID, 12, false, 'CENTER');
 
-  // ---------- Slide 2: Overview ----------
+  // ---------- Slide 2: Overview (3-column cards) ----------
   var s2 = pres.appendSlide(SlidesApp.PredefinedLayout.BLANK);
-  s2.getBackground().setSolidFill(COLORS_.WHITE);
-  addRect_(s2, 0, 0, 720, 6, COLORS_.PRIMARY);
-  addText_(s2, '提案プラン 概要', 30, 15, 660, 40, COLORS_.DARK, 26, true, 'LEFT');
-  addLine_(s2, 30, 55, 690, 55, COLORS_.PRIMARY);
+  s2.getBackground().setSolidFill(COLORS_.BG_SEC);
+  // Top blue bar
+  addRect_(s2, 0, 0, 720, 4, COLORS_.PRIMARY);
+  addText_(s2, '提案プラン 概要', 30, 12, 500, 36, COLORS_.DARK, 24, true, 'LEFT');
+  addText_(s2, 'Plan Overview', 530, 18, 160, 24, COLORS_.SUB, 11, false, 'RIGHT');
+  addLine_(s2, 30, 50, 690, 50, COLORS_.PRIMARY);
 
-  var colW = 210, gap = 12, sx = 30, sy = 70;
+  var colW = 210, gap = 12, sx = 30, sy = 62;
   var tiers = ['matsu', 'take', 'ume'];
   for (var i = 0; i < tiers.length; i++) {
     var tier = tiers[i];
@@ -103,15 +112,22 @@ function createProposalSlides_(data) {
     var total = (data.totals && data.totals[tier]) || 0;
     var x = sx + i * (colW + gap);
 
-    addRect_(s2, x, sy, colW, 330, tc.bg);
-    // Yellow accent bar at top of each card
+    // Card white background (flat, clean)
+    addRect_(s2, x, sy, colW, 340, COLORS_.WHITE);
+    // Blue accent line at top of card
     addRect_(s2, x, sy, colW, 4, COLORS_.PRIMARY);
-    addText_(s2, tc.label, x + 8, sy + 12, colW - 16, 28, tc.fg, 14, true, 'CENTER');
-    addText_(s2, fmtYen_(total), x + 8, sy + 42, colW - 16, 28, COLORS_.DARK, 18, true, 'CENTER');
-    addText_(s2, summ.summary || '', x + 8, sy + 76, colW - 16, 55, COLORS_.SUB, 9, false, 'LEFT');
-
+    // Tier label
+    addRect_(s2, x + 10, sy + 14, colW - 20, 26, tc.bg);
+    addText_(s2, tc.label, x + 10, sy + 14, colW - 20, 26, tc.fg, 12, true, 'CENTER');
+    // Price
+    addText_(s2, fmtYen_(total), x + 8, sy + 46, colW - 16, 30, COLORS_.PRIMARY, 20, true, 'CENTER');
+    // Separator
+    addLine_(s2, x + 20, sy + 80, x + colW - 20, sy + 80, COLORS_.PRIMARY_MID);
+    // Summary
+    addText_(s2, summ.summary || '', x + 12, sy + 86, colW - 24, 52, COLORS_.SUB, 9, false, 'LEFT');
+    // Selling points
     var pts = (summ.sellingPoints || []).map(function(p) { return '\u2713 ' + p; }).join('\n');
-    addText_(s2, pts, x + 8, sy + 136, colW - 16, 190, COLORS_.DARK, 9, false, 'LEFT');
+    addText_(s2, pts, x + 12, sy + 142, colW - 24, 190, COLORS_.DARK, 9, false, 'LEFT');
   }
 
   // ---------- Slides 3–5: Per-tier detail ----------
@@ -125,41 +141,41 @@ function createProposalSlides_(data) {
     var sl = pres.appendSlide(SlidesApp.PredefinedLayout.BLANK);
     sl.getBackground().setSolidFill(COLORS_.WHITE);
 
-    // Yellow accent line at top
-    addRect_(sl, 0, 0, 720, 6, COLORS_.PRIMARY);
+    // Top blue bar
+    addRect_(sl, 0, 0, 720, 4, COLORS_.PRIMARY);
 
-    // Header bar
-    addRect_(sl, 0, 6, 720, 48, tc.bg);
-    addText_(sl, tc.label, 28, 10, 350, 36, tc.fg, 22, true, 'LEFT');
-    addText_(sl, '合計 ' + fmtYen_(total), 380, 10, 310, 36, COLORS_.DARK, 20, true, 'RIGHT');
+    // Header area
+    addRect_(sl, 0, 4, 720, 50, tc.bg);
+    addText_(sl, tc.label, 28, 8, 350, 40, tc.fg, 22, true, 'LEFT');
+    addText_(sl, '合計  ' + fmtYen_(total), 380, 8, 310, 40, COLORS_.PRIMARY, 20, true, 'RIGHT');
 
     // Summary
-    addText_(sl, summ.summary || '', 28, 62, 664, 24, COLORS_.SUB, 11, false, 'LEFT');
+    addText_(sl, summ.summary || '', 28, 60, 664, 24, COLORS_.SUB, 11, false, 'LEFT');
 
-    // Selling points row
+    // Selling points row (blue light badges)
     var sp = summ.sellingPoints || [];
     var spW = sp.length > 0 ? Math.floor(664 / Math.min(sp.length, 4)) : 0;
     for (var p = 0; p < Math.min(sp.length, 4); p++) {
       var px = 28 + p * spW;
-      addRect_(sl, px, 90, spW - 4, 28, COLORS_.PRIMARY_10);
-      addText_(sl, '\u2713 ' + sp[p], px + 4, 92, spW - 12, 24, COLORS_.DARK, 9, true, 'LEFT');
+      addRect_(sl, px, 88, spW - 6, 28, COLORS_.PRIMARY_LIGHT);
+      addText_(sl, '\u2713 ' + sp[p], px + 6, 90, spW - 18, 24, COLORS_.PRIMARY, 9, true, 'LEFT');
     }
 
-    // Table header
-    var ty = 126;
-    addRect_(sl, 28, ty, 664, 20, COLORS_.DARK);
+    // Table header (blue)
+    var ty = 124;
+    addRect_(sl, 28, ty, 664, 22, COLORS_.PRIMARY);
     var cols = [
       { l: 'カテゴリ', w: 90 }, { l: '項目', w: 140 }, { l: '内容', w: 220 },
       { l: '数量', w: 50 }, { l: '単価', w: 82 }, { l: '小計', w: 82 }
     ];
     var cx = 28;
     for (var c = 0; c < cols.length; c++) {
-      addText_(sl, cols[c].l, cx, ty, cols[c].w, 20, COLORS_.WHITE, 8, true, 'CENTER');
+      addText_(sl, cols[c].l, cx, ty, cols[c].w, 22, COLORS_.WHITE, 8, true, 'CENTER');
       cx += cols[c].w;
     }
 
-    // Table rows (limit to ~12 rows to fit slide)
-    var ry = ty + 20;
+    // Table rows (zebra: white / light blue-gray)
+    var ry = ty + 22;
     var maxRows = Math.min(items.length, 12);
     for (var r = 0; r < maxRows; r++) {
       var it = items[r];
@@ -176,16 +192,18 @@ function createProposalSlides_(data) {
       ry += 20;
     }
     if (items.length > maxRows) {
-      addText_(sl, '… 他 ' + (items.length - maxRows) + ' 項目', 28, ry + 4, 664, 16, COLORS_.DARK, 8, false, 'LEFT');
+      addText_(sl, '… 他 ' + (items.length - maxRows) + ' 項目', 28, ry + 4, 664, 16, COLORS_.SUB, 8, false, 'LEFT');
     }
   }
 
   // ---------- Slide 6: Total Comparison ----------
   var sf = pres.appendSlide(SlidesApp.PredefinedLayout.BLANK);
-  sf.getBackground().setSolidFill(COLORS_.WHITE);
-  addRect_(sf, 0, 0, 720, 6, COLORS_.PRIMARY);
-  addText_(sf, 'お見積もり金額 比較', 30, 15, 660, 40, COLORS_.DARK, 26, true, 'LEFT');
-  addLine_(sf, 30, 55, 690, 55, COLORS_.PRIMARY);
+  sf.getBackground().setSolidFill(COLORS_.BG_SEC);
+  // Top blue bar
+  addRect_(sf, 0, 0, 720, 4, COLORS_.PRIMARY);
+  addText_(sf, 'お見積もり金額 比較', 30, 12, 500, 36, COLORS_.DARK, 24, true, 'LEFT');
+  addText_(sf, 'Price Comparison', 530, 18, 160, 24, COLORS_.SUB, 11, false, 'RIGHT');
+  addLine_(sf, 30, 50, 690, 50, COLORS_.PRIMARY);
 
   for (var i = 0; i < tiers.length; i++) {
     var tier = tiers[i];
@@ -193,15 +211,20 @@ function createProposalSlides_(data) {
     var total = (data.totals && data.totals[tier]) || 0;
     var count = (data.items || []).filter(function(it) { return it.tier === tier; }).length;
     var summ = (data.planSummaries && data.planSummaries[tier]) || {};
-    var y = 75 + i * 100;
+    var y = 64 + i * 108;
 
-    addRect_(sf, 50, y, 620, 85, tc.bg);
-    // Yellow left accent on each row
-    addRect_(sf, 50, y, 5, 85, COLORS_.PRIMARY);
-    addText_(sf, tc.label, 70, y + 8, 250, 30, tc.fg, 20, true, 'LEFT');
-    addText_(sf, fmtYen_(total), 350, y + 4, 300, 36, COLORS_.DARK, 28, true, 'RIGHT');
-    addText_(sf, count + ' 項目', 70, y + 42, 200, 20, COLORS_.SUB, 10, false, 'LEFT');
-    addText_(sf, summ.summary || '', 70, y + 60, 580, 18, COLORS_.SUB, 8, false, 'LEFT');
+    // White card on light bg
+    addRect_(sf, 40, y, 640, 95, COLORS_.WHITE);
+    // Left blue accent bar
+    addRect_(sf, 40, y, 5, 95, COLORS_.PRIMARY);
+    // Tier label badge
+    addRect_(sf, 60, y + 10, 160, 28, tc.bg);
+    addText_(sf, tc.label, 60, y + 10, 160, 28, tc.fg, 14, true, 'CENTER');
+    // Price (right-aligned, blue)
+    addText_(sf, fmtYen_(total), 350, y + 6, 310, 36, COLORS_.PRIMARY, 30, true, 'RIGHT');
+    // Item count & summary
+    addText_(sf, count + ' 項目', 60, y + 44, 200, 20, COLORS_.SUB, 10, false, 'LEFT');
+    addText_(sf, summ.summary || '', 60, y + 64, 600, 22, COLORS_.SUB, 8, false, 'LEFT');
   }
 
   return pres.getUrl();
