@@ -31,75 +31,222 @@
       <p class="status" id="apiKeyStatus"></p>
     </section>
 
-    <!-- Step 2: サイトマップ取得 -->
-    <section class="section" id="section-sitemap">
-      <h2><span class="step-number">2</span>サイトマップ / ページ一覧取得</h2>
-      <div class="input-group">
-        <input type="text" id="sitemapUrl" placeholder="https://example.com/sitemap.xml" />
+    <!-- Step 2: モード選択 -->
+    <section class="section" id="section-mode">
+      <h2><span class="step-number">2</span>モード選択</h2>
+      <div class="mode-selector">
+        <div class="mode-card active" data-mode="td" id="modeCardTd">
+          <div class="mode-card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#EC2D44" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="mode-card-title">TD改善</div>
+          <div class="mode-card-desc">既存ページの Title / Description を AI で最適化</div>
+        </div>
+        <div class="mode-card" data-mode="estimate" id="modeCardEstimate">
+          <div class="mode-card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#EC2D44" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div class="mode-card-title">提案見積もり作成</div>
+          <div class="mode-card-desc">サイト分析から松竹梅の改善提案・見積もりを自動生成</div>
+        </div>
       </div>
-      <div class="btn-group">
-        <button id="fetchSitemap" class="btn btn-primary">サイトマップから取得</button>
-        <button id="fetchFromCms" class="btn btn-accent">ferret One から取得</button>
-      </div>
-      <p class="hint">別タブで ferret One の「ページの一括設定」画面を開いた状態でボタンを押してください</p>
-      <p class="status" id="sitemapStatus"></p>
     </section>
 
-    <!-- Step 3: ページ一覧 & TD取得 -->
-    <section class="section" id="section-pages">
-      <h2><span class="step-number">3</span>ページ一覧 / Title・Description 取得</h2>
-      <div class="table-wrapper">
-        <table id="pagesTable">
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="selectAll" checked /></th>
-              <th>パス</th>
-              <th>Title</th>
-              <th>Description</th>
-              <th>公開</th>
-            </tr>
-          </thead>
-          <tbody id="pagesTableBody">
-          </tbody>
-        </table>
-      </div>
-      <p class="page-count">検出ページ数: <span id="pageCount">0</span></p>
-      <button id="fetchMeta" class="btn btn-primary" disabled>選択ページの TD 取得</button>
-      <p class="status" id="metaStatus"></p>
-    </section>
+    <!-- ========== TD改善モード ========== -->
+    <div id="td-sections">
+      <!-- Step 3: サイトマップ取得 -->
+      <section class="section" id="section-sitemap">
+        <h2><span class="step-number">3</span>サイトマップ / ページ一覧取得</h2>
+        <div class="input-group">
+          <input type="text" id="sitemapUrl" placeholder="https://example.com/sitemap.xml" />
+        </div>
+        <div class="btn-group">
+          <button id="fetchSitemap" class="btn btn-primary">サイトマップから取得</button>
+          <button id="fetchFromCms" class="btn btn-accent">ferret One から取得</button>
+        </div>
+        <p class="hint">別タブで ferret One の「ページの一括設定」画面を開いた状態でボタンを押してください</p>
+        <p class="status" id="sitemapStatus"></p>
+      </section>
 
-    <!-- Step 4: AI提案 -->
-    <section class="section" id="section-ai">
-      <h2><span class="step-number">4</span>AI による TD 改善提案</h2>
-      <button id="generateSuggestions" class="btn btn-accent" disabled>AI 提案を生成</button>
-      <div id="progressBar" class="progress-bar" style="display:none;">
-        <div id="progressFill" class="progress-fill"></div>
-        <span id="progressText">0%</span>
-      </div>
-      <p class="status" id="aiStatus"></p>
-    </section>
+      <!-- Step 4: ページ一覧 & TD取得 -->
+      <section class="section" id="section-pages">
+        <h2><span class="step-number">4</span>ページ一覧 / Title・Description 取得</h2>
+        <div class="table-wrapper">
+          <table id="pagesTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" checked /></th>
+                <th>パス</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>公開</th>
+              </tr>
+            </thead>
+            <tbody id="pagesTableBody">
+            </tbody>
+          </table>
+        </div>
+        <p class="page-count">検出ページ数: <span id="pageCount">0</span></p>
+        <button id="fetchMeta" class="btn btn-primary" disabled>選択ページの TD 取得</button>
+        <p class="status" id="metaStatus"></p>
+      </section>
 
-    <!-- Step 5: 結果 & CSV -->
-    <section class="section" id="section-results">
-      <h2><span class="step-number">5</span>結果 / CSV 書き出し</h2>
-      <div class="table-wrapper">
-        <table id="resultsTable">
-          <thead>
-            <tr>
-              <th>パス</th>
-              <th>現在のTitle</th>
-              <th>提案Title</th>
-              <th>現在のDesc</th>
-              <th>提案Desc</th>
-              <th>改善ポイント</th>
-            </tr>
-          </thead>
-          <tbody id="resultsTableBody">
-          </tbody>
-        </table>
-      </div>
-      <button id="exportCsv" class="btn btn-accent" disabled>CSV 書き出し</button>
-    </section>
+      <!-- Step 5: AI提案 -->
+      <section class="section" id="section-ai">
+        <h2><span class="step-number">5</span>AI による TD 改善提案</h2>
+        <button id="generateSuggestions" class="btn btn-accent" disabled>AI 提案を生成</button>
+        <div id="progressBar" class="progress-bar" style="display:none;">
+          <div id="progressFill" class="progress-fill"></div>
+          <span id="progressText">0%</span>
+        </div>
+        <p class="status" id="aiStatus"></p>
+      </section>
+
+      <!-- Step 6: 結果 & CSV -->
+      <section class="section" id="section-results">
+        <h2><span class="step-number">6</span>結果 / CSV 書き出し</h2>
+        <div class="table-wrapper">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>パス</th>
+                <th>現在のTitle</th>
+                <th>提案Title</th>
+                <th>現在のDesc</th>
+                <th>提案Desc</th>
+                <th>改善ポイント</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody">
+            </tbody>
+          </table>
+        </div>
+        <button id="exportCsv" class="btn btn-accent" disabled>CSV 書き出し</button>
+      </section>
+    </div>
+
+    <!-- ========== 提案見積もりモード ========== -->
+    <div id="estimate-sections" style="display:none;">
+
+      <!-- Step 3: 分析対象の入力 -->
+      <section class="section" id="section-est-input">
+        <h2><span class="step-number">3</span>分析対象の入力</h2>
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="est-sitemap-tab" id="tabEstSitemap">サイトマップから分析</button>
+          <button class="tab-btn" data-tab="est-manual-tab" id="tabEstManual">ページ作成メニュー入力</button>
+        </div>
+
+        <!-- サイトマップ分析タブ -->
+        <div class="tab-content active" id="est-sitemap-tab">
+          <div class="input-group">
+            <input type="text" id="estSitemapUrl" placeholder="https://example.com/sitemap.xml" />
+          </div>
+          <div class="btn-group">
+            <button id="estFetchSitemap" class="btn btn-primary">サイトマップから取得</button>
+            <button id="estFetchFromCms" class="btn btn-accent">ferret One から取得</button>
+          </div>
+          <p class="hint">既存サイトのページを取得して改善提案を生成します</p>
+        </div>
+
+        <!-- ページ作成メニュータブ -->
+        <div class="tab-content" id="est-manual-tab" style="display:none;">
+          <textarea id="manualPageList" class="textarea" rows="8" placeholder="作成したいページを1行に1つ入力してください&#10;&#10;例:&#10;トップページ リニューアル&#10;サービス紹介ページ&#10;導入事例ページ（5件）&#10;料金ページ&#10;お問い合わせページ&#10;ブログ記事（10本）"></textarea>
+          <button id="parseManualPages" class="btn btn-primary" style="margin-top:10px;">ページリストを読み込む</button>
+        </div>
+
+        <p class="status" id="estInputStatus"></p>
+
+        <!-- 取得ページ一覧 -->
+        <div id="estPagesWrapper" style="display:none; margin-top:16px;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="estSelectAll" checked /></th>
+                  <th>ページ</th>
+                  <th>タイプ</th>
+                  <th>現在のTitle</th>
+                </tr>
+              </thead>
+              <tbody id="estPagesBody"></tbody>
+            </table>
+          </div>
+          <p class="page-count">対象ページ数: <span id="estPageCount">0</span></p>
+        </div>
+      </section>
+
+      <!-- Step 4: AI 松竹梅提案生成 -->
+      <section class="section" id="section-est-ai">
+        <h2><span class="step-number">4</span>AI 松竹梅 提案生成</h2>
+        <p style="font-size:12px; color:rgba(74,26,31,0.6); margin-bottom:12px;">
+          対象ページを分析し、3段階の改善プランと見積もりを自動生成します
+        </p>
+        <button id="generateEstimate" class="btn btn-accent" disabled>松竹梅の提案を生成</button>
+        <div id="estProgressBar" class="progress-bar" style="display:none;">
+          <div id="estProgressFill" class="progress-fill"></div>
+          <span id="estProgressText">0%</span>
+        </div>
+        <p class="status" id="estAiStatus"></p>
+      </section>
+
+      <!-- Step 5: 見積もり調整 & エクスポート -->
+      <section class="section" id="section-est-result">
+        <h2><span class="step-number">5</span>見積もり調整 / エクスポート</h2>
+
+        <!-- プラン切替タブ -->
+        <div class="tier-tabs">
+          <button class="tier-tab active" data-tier="all">全プラン</button>
+          <button class="tier-tab" data-tier="matsu"><span class="badge badge-matsu">松</span> プレミアム</button>
+          <button class="tier-tab" data-tier="take"><span class="badge badge-take">竹</span> スタンダード</button>
+          <button class="tier-tab" data-tier="ume"><span class="badge badge-ume">梅</span> ライト</button>
+        </div>
+
+        <!-- 見積もりテーブル -->
+        <div class="table-wrapper" style="max-height:600px;">
+          <table id="estimateTable">
+            <thead>
+              <tr>
+                <th style="width:60px;">プラン</th>
+                <th>カテゴリ</th>
+                <th>項目</th>
+                <th style="max-width:300px;">内容</th>
+                <th style="width:70px;">数量</th>
+                <th style="width:100px;">単価（円）</th>
+                <th style="width:100px;">小計（円）</th>
+                <th style="width:36px;"></th>
+              </tr>
+            </thead>
+            <tbody id="estimateTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- 合計表示 -->
+        <div class="estimate-totals">
+          <div class="estimate-total-row">
+            <span class="badge badge-matsu">松</span>
+            <span class="total-label">プレミアム 合計</span>
+            <span class="total-value" id="totalMatsu">-</span>
+          </div>
+          <div class="estimate-total-row">
+            <span class="badge badge-take">竹</span>
+            <span class="total-label">スタンダード 合計</span>
+            <span class="total-value" id="totalTake">-</span>
+          </div>
+          <div class="estimate-total-row">
+            <span class="badge badge-ume">梅</span>
+            <span class="total-label">ライト 合計</span>
+            <span class="total-value" id="totalUme">-</span>
+          </div>
+        </div>
+
+        <!-- アクション -->
+        <div class="btn-group" style="margin-top:14px;">
+          <button id="exportEstimateCsv" class="btn btn-accent" disabled>見積もり CSV 書き出し</button>
+          <button id="addEstimateRow" class="btn btn-primary">行を追加</button>
+        </div>
+      </section>
+
+    </div>
 
   </div>
 

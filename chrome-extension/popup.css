@@ -107,6 +107,279 @@ h2 {
   flex-shrink: 0;
 }
 
+/* ===== Mode Selector ===== */
+.mode-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mode-card {
+  border: 2px solid rgba(236, 45, 68, 0.15);
+  border-radius: 6px;
+  padding: 20px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.mode-card:hover {
+  border-color: rgba(236, 45, 68, 0.4);
+  background: rgba(247, 226, 229, 0.3);
+}
+
+.mode-card.active {
+  border-color: #EC2D44;
+  background: rgba(236, 45, 68, 0.06);
+  box-shadow: 0 0 0 3px rgba(236, 45, 68, 0.1);
+}
+
+.mode-card-icon {
+  margin-bottom: 10px;
+}
+
+.mode-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4A1A1F;
+  margin-bottom: 6px;
+}
+
+.mode-card.active .mode-card-title {
+  color: #EC2D44;
+}
+
+.mode-card-desc {
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(74, 26, 31, 0.55);
+  line-height: 1.5;
+}
+
+/* ===== Tab Bar ===== */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid rgba(236, 45, 68, 0.15);
+}
+
+.tab-btn {
+  padding: 8px 20px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: rgba(74, 26, 31, 0.5);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  color: #EC2D44;
+}
+
+.tab-btn.active {
+  color: #EC2D44;
+  border-bottom-color: #EC2D44;
+}
+
+/* ===== Textarea ===== */
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid rgba(236, 45, 68, 0.25);
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #4A1A1F;
+  background: #FFFFFF;
+  resize: vertical;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+}
+
+.textarea::placeholder {
+  color: rgba(74, 26, 31, 0.35);
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #EC2D44;
+  box-shadow: 0 0 0 3px rgba(236, 45, 68, 0.1);
+}
+
+/* ===== Tier Tabs ===== */
+.tier-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.tier-tab {
+  padding: 6px 14px;
+  border: 1.5px solid rgba(236, 45, 68, 0.2);
+  border-radius: 20px;
+  background: #FFFFFF;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: rgba(74, 26, 31, 0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tier-tab:hover {
+  border-color: #EC2D44;
+  color: #EC2D44;
+}
+
+.tier-tab.active {
+  background: #EC2D44;
+  border-color: #EC2D44;
+  color: #FFFFFF;
+}
+
+.tier-tab.active .badge {
+  background: #FFFFFF;
+}
+
+.tier-tab.active .badge-matsu {
+  color: #B8860B;
+}
+
+.tier-tab.active .badge-take {
+  color: #2E7D32;
+}
+
+.tier-tab.active .badge-ume {
+  color: #E65100;
+}
+
+/* ===== Badges (松竹梅) ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.badge-matsu {
+  background: #FFF8E1;
+  color: #B8860B;
+  border: 1px solid rgba(184, 134, 11, 0.3);
+}
+
+.badge-take {
+  background: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid rgba(46, 125, 50, 0.3);
+}
+
+.badge-ume {
+  background: #FFF3E0;
+  color: #E65100;
+  border: 1px solid rgba(230, 81, 0, 0.3);
+}
+
+/* ===== Estimate Totals ===== */
+.estimate-totals {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.estimate-total-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(247, 226, 229, 0.4);
+  border-radius: 4px;
+}
+
+.total-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A1A1F;
+}
+
+.total-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #EC2D44;
+  letter-spacing: 0.02em;
+}
+
+/* ===== Editable Table Cells ===== */
+.cell-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1.5px solid rgba(236, 45, 68, 0.2);
+  border-radius: 2px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #4A1A1F;
+  background: #FFFFFF;
+  text-align: right;
+  transition: border-color 0.15s;
+}
+
+.cell-input:focus {
+  outline: none;
+  border-color: #EC2D44;
+  box-shadow: 0 0 0 2px rgba(236, 45, 68, 0.1);
+}
+
+.cell-input::-webkit-inner-spin-button {
+  opacity: 0.3;
+}
+
+/* Delete row button */
+.btn-delete-row {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: rgba(74, 26, 31, 0.3);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-delete-row:hover {
+  background: rgba(210, 30, 50, 0.1);
+  color: #D21E32;
+}
+
+/* Estimate table specific */
+#estimateTable td {
+  white-space: normal;
+  vertical-align: middle;
+}
+
+#estimateTable td[data-tier] {
+  text-align: center;
+}
+
 /* ===== Input ===== */
 .input-group {
   display: flex;
@@ -140,6 +413,7 @@ h2 {
 .btn-group {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btn {

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Meta提案拡張機能",
-  "version": "1.1.0",
-  "description": "ferret One ページ一覧からAIでSEO効果の高いTitle/Descriptionを提案するChrome拡張機能",
+  "version": "2.0.0",
+  "description": "TD改善 & 松竹梅見積もり作成 — ferret One対応SEO提案Chrome拡張機能",
   "permissions": [
     "activeTab",
     "tabs",
