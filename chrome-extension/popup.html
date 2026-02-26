@@ -175,6 +175,61 @@
         </div>
       </section>
 
+      <!-- 単価設定（折りたたみ） -->
+      <section class="section" id="section-price-settings">
+        <h2 class="price-settings-header" id="togglePriceSettings">
+          <span class="step-number">⚙</span>単価設定
+          <span class="toggle-arrow" id="priceSettingsArrow">▶</span>
+        </h2>
+        <div id="priceSettingsBody" style="display:none;">
+          <p style="font-size:11px; color:rgba(74,26,31,0.5); margin-bottom:12px;">
+            AI 提案の見積もり金額の基準となる単価表です。編集・追加が可能です。
+          </p>
+
+          <!-- Category filter -->
+          <div class="price-category-filter" id="priceCategoryFilter"></div>
+
+          <div class="table-wrapper" style="max-height:350px;">
+            <table id="priceListTable">
+              <thead>
+                <tr>
+                  <th>カテゴリ</th>
+                  <th>項目名</th>
+                  <th style="width:110px;">単価（円）</th>
+                  <th style="width:120px;">備考</th>
+                  <th style="width:36px;"></th>
+                </tr>
+              </thead>
+              <tbody id="priceListBody"></tbody>
+            </table>
+          </div>
+          <p class="page-count" style="margin-top:6px;">登録項目数: <span id="priceItemCount">0</span></p>
+
+          <div class="btn-group" style="margin-top:10px;">
+            <button id="addPriceItem" class="btn btn-primary">項目を追加</button>
+            <button id="savePriceSettings" class="btn btn-accent">単価を保存</button>
+            <button id="resetPriceList" class="btn btn-secondary">デフォルトに戻す</button>
+          </div>
+
+          <!-- Pricing Rules -->
+          <div class="pricing-rules">
+            <h3 style="font-size:12px; font-weight:700; color:#EC2D44; margin-bottom:8px; margin-top:16px; padding-top:12px; border-top:1px solid rgba(236,45,68,0.15);">見積ルール</h3>
+            <div class="rules-grid">
+              <label>ディレクション費（通常）</label>
+              <div><input type="number" id="ruleDirectionFee" class="cell-input" value="20" min="0" max="100" style="width:60px;text-align:center;" /> %</div>
+              <label>ディレクション費（大型/リニューアル）</label>
+              <div><input type="number" id="ruleDirectionFeeLarge" class="cell-input" value="25" min="0" max="100" style="width:60px;text-align:center;" /> %</div>
+              <label>実装 時間単価</label>
+              <div><input type="number" id="ruleHourlyRate" class="cell-input" value="13500" min="0" step="500" style="width:100px;" /> 円</div>
+              <label>JSパーツ ディレクション費</label>
+              <div><input type="number" id="ruleJsBase" class="cell-input" value="15000" min="0" step="1000" style="width:100px;" /> 円</div>
+            </div>
+          </div>
+
+          <p class="status" id="priceSettingsStatus"></p>
+        </div>
+      </section>
+
       <!-- Step 4: AI 松竹梅提案生成 -->
       <section class="section" id="section-est-ai">
         <h2><span class="step-number">4</span>AI 松竹梅 提案生成</h2>

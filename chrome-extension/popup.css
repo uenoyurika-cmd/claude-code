@@ -633,6 +633,78 @@ input[type="checkbox"]:checked::after {
   background: rgba(236, 45, 68, 0.45);
 }
 
+/* ===== Price Settings ===== */
+.price-settings-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.toggle-arrow {
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(236, 45, 68, 0.5);
+  transition: transform 0.2s;
+}
+
+.price-settings-header:hover .toggle-arrow {
+  color: #EC2D44;
+}
+
+.price-category-filter {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.price-cat-btn {
+  padding: 4px 12px;
+  border: 1.5px solid rgba(236, 45, 68, 0.2);
+  border-radius: 14px;
+  background: #FFFFFF;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 600;
+  color: rgba(74, 26, 31, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.price-cat-btn:hover {
+  border-color: #EC2D44;
+  color: #EC2D44;
+}
+
+.price-cat-btn.active {
+  background: #EC2D44;
+  border-color: #EC2D44;
+  color: #FFFFFF;
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.rules-grid label {
+  font-weight: 600;
+  color: rgba(74, 26, 31, 0.7);
+}
+
+.rules-grid div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(74, 26, 31, 0.6);
+}
+
 /* ===== Divider line ===== */
 .divider {
   height: 1px;

@@ -1,3 +1,138 @@
+// ===== Default Price List =====
+const DEFAULT_PRICE_LIST = [
+  // --- ページ制作（通常・ディレクション費20%） ---
+  { category: "ページ制作", name: "TOPリニューアル（M）", price: 540000, note: "6〜8セクション" },
+  { category: "ページ制作", name: "TOPリニューアル（L）", price: 675000, note: "9〜11セクション" },
+  { category: "ページ制作", name: "TOPリニューアル（M・ライティング込）", price: 675000, note: "" },
+  { category: "ページ制作", name: "TOPリニューアル（L・ライティング込）", price: 810000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS少・M）", price: 170000, note: "既存パーツ中心" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS少・L）", price: 275000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS少・M・W）", price: 284000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS少・L・W）", price: 389000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS中・M）", price: 259000, note: "CSSの調整あり" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS中・L）", price: 405000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS中・M・W）", price: 373000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS中・L・W）", price: 518000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS多・M）", price: 356000, note: "CSSの作り込みが多い" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS多・L）", price: 502000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS多・M・W）", price: 470000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザインあり・CSS多・L・W）", price: 616000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS少・M）", price: 89000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS少・L）", price: 146000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS少・M・W）", price: 203000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS少・L・W）", price: 259000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS中・M）", price: 178000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS中・L）", price: 275000, note: "" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS中・M・W）", price: 292000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（デザイン提出なし・CSS中・L・W）", price: 389000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS少・M）", price: 138000, note: "" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS少・L）", price: 211000, note: "" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS少・M・W）", price: 251000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS少・L・W）", price: 324000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS中・M）", price: 227000, note: "" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS中・L）", price: 340000, note: "" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS中・M・W）", price: 340000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS中・L・W）", price: 454000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS多・M）", price: 324000, note: "" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS多・L）", price: 437000, note: "" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS多・M・W）", price: 437000, note: "ライティング込" },
+  { category: "ページ制作", name: "下層ページ（WF支給・CSS多・L・W）", price: 551000, note: "ライティング込" },
+  { category: "ページ制作", name: "LP（デザインそのまま・M）", price: 405000, note: "" },
+  { category: "ページ制作", name: "LP（デザインそのまま・L）", price: 540000, note: "" },
+  { category: "ページ制作", name: "LPベーシック（M）", price: 540000, note: "" },
+  { category: "ページ制作", name: "LPベーシック（L）", price: 675000, note: "" },
+  { category: "ページ制作", name: "ベースデザイン設定", price: 27000, note: "" },
+  { category: "ページ制作", name: "既存テンプレ流し込み", price: 20000, note: "" },
+  { category: "ページ制作", name: "記事リスト一覧ページ", price: 7000, note: "" },
+  { category: "ページ制作", name: "完了ページ", price: 0, note: "" },
+  { category: "ページ制作", name: "ページ複製・差し替え", price: 14000, note: "" },
+  { category: "ページ制作", name: "本番反映（TOP以外）", price: 7000, note: "1ページ0.5h" },
+  { category: "ページ制作", name: "TOP本番反映", price: 32000, note: "¥32,000〜¥70,000" },
+
+  // --- ページ制作（大型/リニューアル・ディレクション費25%・×1.05） ---
+  { category: "大型/リニューアル", name: "TOPリニューアル（M）", price: 567000, note: "×1.05" },
+  { category: "大型/リニューアル", name: "TOPリニューアル（L）", price: 709000, note: "×1.05" },
+  { category: "大型/リニューアル", name: "TOPリニューアル（M・ライティング込）", price: 709000, note: "×1.05" },
+  { category: "大型/リニューアル", name: "TOPリニューアル（L・ライティング込）", price: 851000, note: "×1.05" },
+
+  // --- WF/ディレクション ---
+  { category: "WF/ディレクション", name: "WF提供（TOP）", price: 68000, note: "" },
+  { category: "WF/ディレクション", name: "WF提供（下層ページ）", price: 41000, note: "" },
+  { category: "WF/ディレクション", name: "WF提供（LP/ボリューム多め）", price: 68000, note: "" },
+  { category: "WF/ディレクション", name: "WF清書（客提供）", price: 54000, note: "" },
+  { category: "WF/ディレクション", name: "サイトマップ制作（〜50P）", price: 68000, note: "" },
+  { category: "WF/ディレクション", name: "リダイレクト設定CSV", price: 41000, note: "" },
+  { category: "WF/ディレクション", name: "原稿制作（ヒアリング→たたき）", price: 41000, note: "" },
+
+  // --- デザイン ---
+  { category: "デザイン", name: "画像選定（5枚あたり）", price: 14000, note: "" },
+  { category: "デザイン", name: "バナー・画像制作（PC）", price: 49000, note: "" },
+  { category: "デザイン", name: "MV作成（シンプル）", price: 54000, note: "" },
+  { category: "デザイン", name: "MV作成（2-3枚）", price: 68000, note: "" },
+  { category: "デザイン", name: "MV作成（背景+モック）", price: 74000, note: "" },
+  { category: "デザイン", name: "MV作成（装飾・ボタン2つ）", price: 128000, note: "" },
+  { category: "デザイン", name: "MV作成（イラスト/概念図）", price: 135000, note: "¥135,000〜" },
+  { category: "デザイン", name: "編集データ提供", price: 20000, note: "" },
+  { category: "デザイン", name: "スマホカンプ（M）", price: 68000, note: "" },
+  { category: "デザイン", name: "スマホカンプ（L）", price: 108000, note: "" },
+  { category: "デザイン", name: "カンプ提案（TOP/LP）", price: 203000, note: "" },
+
+  // --- 分析 ---
+  { category: "分析", name: "ヒューリスティック調査", price: 300000, note: "" },
+  { category: "分析", name: "競合分析調査", price: 350000, note: "" },
+
+  // --- JSパーツ（コーダー工数×13,500+15,000 ディレ費） ---
+  { category: "JSパーツ", name: "擬似ナビ", price: 83000, note: "5h" },
+  { category: "JSパーツ", name: "メガメニュー", price: 218000, note: "15h〜" },
+  { category: "JSパーツ", name: "SPハンバーガー移動", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "フォームテキスト英語化", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "モーダル1", price: 123000, note: "8h" },
+  { category: "JSパーツ", name: "モーダル02", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "cookie判定", price: 83000, note: "5h" },
+  { category: "JSパーツ", name: "初回モーダル", price: 96000, note: "6h" },
+  { category: "JSパーツ", name: "スクロールモーダル", price: 96000, note: "6h" },
+  { category: "JSパーツ", name: "バナーポップアップ", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "スライダー（自動）", price: 83000, note: "5h" },
+  { category: "JSパーツ", name: "スライダー（手動）", price: 69000, note: "4h" },
+  { category: "JSパーツ", name: "アニメーション（横スライド）", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "背景色切替", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "アコーディオン（FAQ）", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "タブ切り替え（col）", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "CTA・擬似フッター100%", price: 35000, note: "1.5h" },
+  { category: "JSパーツ", name: "カレントナビ", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "カレント表示（テキスト）", price: 35000, note: "1.5h" },
+  { category: "JSパーツ", name: "TOPボタン", price: 29000, note: "1h" },
+  { category: "JSパーツ", name: "追従セクション", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "リンクリスト表示", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "パンくず名称変更", price: 29000, note: "1h" },
+  { category: "JSパーツ", name: "パンくず移動", price: 29000, note: "1h" },
+  { category: "JSパーツ", name: "検索結果MV/サイドバー非表示", price: 35000, note: "1.5h" },
+  { category: "JSパーツ", name: "サイドメニュー開閉", price: 35000, note: "1.5h" },
+  { category: "JSパーツ", name: "フォーム追従", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "画像+テキストスライド", price: 69000, note: "4h" },
+  { category: "JSパーツ", name: "スライドショー（ズーム+フェード）", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "ロゴスクロール", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "フェードイン", price: 83000, note: "5h" },
+  { category: "JSパーツ", name: "アコーディオン（行ver.）", price: 42000, note: "2h" },
+  { category: "JSパーツ", name: "タブ切り替え（リスト）", price: 56000, note: "3h" },
+  { category: "JSパーツ", name: "アンド検索", price: 69000, note: "4h" },
+  { category: "JSパーツ", name: "JSパーツ反映（6-10P）", price: 14000, note: "1h" },
+
+  // --- その他 ---
+  { category: "その他", name: "サポコンサイト掲載（ロゴ・社名・URL）", price: 7000, note: "" },
+  { category: "その他", name: "サポコンサイト掲載（紹介文250文字）", price: 14000, note: "" },
+  { category: "その他", name: "サポコンサイト掲載（インタビュー）", price: 41000, note: "" },
+];
+
+const DEFAULT_PRICING_RULES = {
+  directionFeeRate: 20,             // ディレクション費（通常）: 全体の20%
+  directionFeeRateLarge: 25,        // 大型/リニューアル: 全体の25%
+  hourlyRate: 13500,                // 通常実装 時間単価
+  jsPartsDirectionFee: 15000,       // JSパーツ ディレクション費
+  deployPerPage: 7000,              // 本番反映（TOP以外）1ページ
+  renewalMultiplier: 1.05,          // 大型/リニューアル 乗算
+};
+
 // ===== State =====
 let currentMode = "td"; // "td" | "estimate"
 let pages = []; // { url, path, title, description, status, noIndex, selected }
@@ -7,6 +142,11 @@ let results = []; // { url, path, currentTitle, suggestedTitle, currentDesc, sug
 let estPages = []; // { name, type, url, path, title, selected }
 let estimateItems = []; // { id, tier, category, item, description, quantity, unitPrice }
 let currentTierFilter = "all";
+
+// Price list state
+let priceList = [];
+let pricingRules = {};
+let priceFilterCategory = "all";
 
 // ===== DOM Elements =====
 const $ = (id) => document.getElementById(id);
@@ -55,6 +195,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".tier-tab").forEach((btn) => {
     btn.addEventListener("click", () => filterTier(btn.dataset.tier));
   });
+
+  // Price settings
+  await loadPriceList();
+  $("togglePriceSettings").addEventListener("click", togglePriceSettings);
+  $("addPriceItem").addEventListener("click", addPriceItem);
+  $("resetPriceList").addEventListener("click", resetPriceList);
+  $("savePriceSettings").addEventListener("click", savePriceList);
+  $("ruleDirectionFee").addEventListener("change", () => { pricingRules.directionFeeRate = Number($("ruleDirectionFee").value) || 20; });
+  $("ruleDirectionFeeLarge").addEventListener("change", () => { pricingRules.directionFeeRateLarge = Number($("ruleDirectionFeeLarge").value) || 25; });
+  $("ruleHourlyRate").addEventListener("change", () => { pricingRules.hourlyRate = Number($("ruleHourlyRate").value) || 13500; });
+  $("ruleJsBase").addEventListener("change", () => { pricingRules.jsPartsDirectionFee = Number($("ruleJsBase").value) || 15000; });
 });
 
 // ===== Mode Selection =====
@@ -469,6 +620,9 @@ async function generateEstimate() {
 function buildEstimatePrompt(pageList, pageCount, isNewPages) {
   const typeLabel = isNewPages ? "新規ページ作成" : "既存ページ改善";
 
+  // Build price reference from current price list
+  const priceRef = buildPriceReference();
+
   return `あなたはWebコンサルタント・Web制作ディレクターであり、サイト改善の見積もり作成のプロです。
 以下のページリストに基づき、${typeLabel}の提案を松竹梅の3プランで作成してください。
 TD（Title/Description）に限らず、デザイン・UX・コンテンツ・SEO・パフォーマンス・導線設計など、サイト全体の改善を幅広く提案してください。
@@ -476,8 +630,21 @@ TD（Title/Description）に限らず、デザイン・UX・コンテンツ・SE
 【対象ページ一覧（${pageCount}件）】
 ${pageList}
 
+【自社単価表（この金額を基準にしてください）】
+${priceRef}
+
+【見積ルール】
+- ディレクション費（通常）: 全体の${pricingRules.directionFeeRate}%
+- ディレクション費（大型/リニューアル案件）: 全体の${pricingRules.directionFeeRateLarge}%
+- 通常実装 時間単価: ¥${pricingRules.hourlyRate.toLocaleString()}
+- JSパーツ: コーダー工数×¥${pricingRules.hourlyRate.toLocaleString()}+¥${pricingRules.jsPartsDirectionFee.toLocaleString()}（ディレ費）
+- サイトチェック: ディレクション費に含む
+- Mサイズ: 6〜8セクション / Lサイズ: 9〜11セクション
+- CSS少: 既存パーツ中心 / CSS中: CSSの調整あり / CSS多: CSSの作り込みが多い
+- W: ライティング込み
+
 以下のJSON形式で回答してください。各プランに複数の作業項目を含めてください。
-金額は日本円で、現実的なWeb制作・改善の相場に基づいてください。
+金額は上記の自社単価表に基づき、日本円で設定してください。単価表にない項目は相場に基づいて見積もってください。
 
 {
   "matsu": [
@@ -502,10 +669,29 @@ ${pageList}
 
 【注意】
 - quantityはページ数や作業回数を反映してください（対象は${pageCount}ページ）
-- unitPriceは1件あたりの単価（円）
-- カテゴリ例: ディレクション, デザイン, コーディング, コンテンツ制作, SEO対策, UX/UI改善, パフォーマンス改善, 解析・レポート 等
+- unitPriceは自社単価表の金額を使用してください
+- カテゴリ例: ディレクション, ページ制作, デザイン, WF/ディレクション, コンテンツ制作, SEO対策, JSパーツ, 分析 等
 - 各プランは4〜10項目程度
-- 合計金額の目安: 松は竹の1.5〜2倍、梅は竹の0.3〜0.5倍`;
+- ディレクション費を各プランの最初の項目として含めてください`;
+}
+
+function buildPriceReference() {
+  const grouped = {};
+  priceList.forEach((item) => {
+    if (!grouped[item.category]) grouped[item.category] = [];
+    grouped[item.category].push(item);
+  });
+
+  let ref = "";
+  for (const [category, items] of Object.entries(grouped)) {
+    ref += `\n【${category}】\n`;
+    items.forEach((item) => {
+      ref += `- ${item.name}: ¥${item.price.toLocaleString()}`;
+      if (item.note) ref += `（${item.note}）`;
+      ref += "\n";
+    });
+  }
+  return ref;
 }
 
 function addEstimateItemFromAI(tier, item) {
@@ -640,6 +826,135 @@ function exportEstimateCsv() {
   rows.push(["", "", "", "", "", "梅 合計", totals.ume]);
 
   downloadCsv(`site_estimate_${formatDate()}.csv`, headers, rows);
+}
+
+// =========================================================
+//  単価設定（Price List Settings）
+// =========================================================
+
+async function loadPriceList() {
+  const stored = await chrome.storage.local.get(["priceList", "pricingRules"]);
+  priceList = stored.priceList || JSON.parse(JSON.stringify(DEFAULT_PRICE_LIST));
+  pricingRules = stored.pricingRules || { ...DEFAULT_PRICING_RULES };
+  $("ruleDirectionFee").value = pricingRules.directionFeeRate;
+  $("ruleDirectionFeeLarge").value = pricingRules.directionFeeRateLarge;
+  $("ruleHourlyRate").value = pricingRules.hourlyRate;
+  $("ruleJsBase").value = pricingRules.jsPartsDirectionFee;
+  renderPriceCategoryFilter();
+  renderPriceListTable();
+}
+
+async function savePriceList() {
+  // Collect current values from inputs
+  const rows = document.querySelectorAll("#priceListBody tr");
+  rows.forEach((tr) => {
+    const idx = Number(tr.dataset.index);
+    if (isNaN(idx) || !priceList[idx]) return;
+    const inputs = tr.querySelectorAll("input");
+    priceList[idx].price = Number(inputs[0]?.value) || 0;
+    priceList[idx].note = inputs[1]?.value || "";
+  });
+
+  pricingRules.directionFeeRate = Number($("ruleDirectionFee").value) || 20;
+  pricingRules.directionFeeRateLarge = Number($("ruleDirectionFeeLarge").value) || 25;
+  pricingRules.hourlyRate = Number($("ruleHourlyRate").value) || 13500;
+  pricingRules.jsPartsDirectionFee = Number($("ruleJsBase").value) || 15000;
+
+  await chrome.storage.local.set({ priceList, pricingRules });
+  setStatus("priceSettingsStatus", "単価設定を保存しました", "success");
+}
+
+async function resetPriceList() {
+  priceList = JSON.parse(JSON.stringify(DEFAULT_PRICE_LIST));
+  pricingRules = { ...DEFAULT_PRICING_RULES };
+  await chrome.storage.local.set({ priceList, pricingRules });
+  $("ruleDirectionFee").value = pricingRules.directionFeeRate;
+  $("ruleDirectionFeeLarge").value = pricingRules.directionFeeRateLarge;
+  $("ruleHourlyRate").value = pricingRules.hourlyRate;
+  $("ruleJsBase").value = pricingRules.jsPartsDirectionFee;
+  renderPriceCategoryFilter();
+  renderPriceListTable();
+  setStatus("priceSettingsStatus", "デフォルト単価に戻しました", "success");
+}
+
+function togglePriceSettings() {
+  const body = $("priceSettingsBody");
+  const arrow = $("priceSettingsArrow");
+  const isHidden = body.style.display === "none";
+  body.style.display = isHidden ? "" : "none";
+  arrow.textContent = isHidden ? "▼" : "▶";
+}
+
+function renderPriceCategoryFilter() {
+  const container = $("priceCategoryFilter");
+  const categories = ["all", ...new Set(priceList.map((p) => p.category))];
+  container.innerHTML = categories.map((cat) => {
+    const label = cat === "all" ? "すべて" : cat;
+    const active = cat === priceFilterCategory ? "active" : "";
+    return `<button class="price-cat-btn ${active}" data-cat="${escapeHtml(cat)}">${escapeHtml(label)}</button>`;
+  }).join("");
+
+  container.querySelectorAll(".price-cat-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      priceFilterCategory = btn.dataset.cat;
+      container.querySelectorAll(".price-cat-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderPriceListTable();
+    });
+  });
+}
+
+function renderPriceListTable() {
+  const tbody = $("priceListBody");
+  tbody.innerHTML = "";
+
+  priceList.forEach((item, idx) => {
+    if (priceFilterCategory !== "all" && item.category !== priceFilterCategory) return;
+
+    const tr = document.createElement("tr");
+    tr.dataset.index = idx;
+    tr.innerHTML = `
+      <td title="${escapeHtml(item.category)}">${escapeHtml(item.category)}</td>
+      <td title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td>
+      <td><input type="number" class="cell-input" value="${item.price}" min="0" step="1000" /></td>
+      <td><input type="text" class="cell-input" value="${escapeHtml(item.note || "")}" style="text-align:left;" /></td>
+      <td><button class="btn-delete-row" title="削除">×</button></td>
+    `;
+
+    // Price input change
+    const priceInput = tr.querySelectorAll("input")[0];
+    priceInput.addEventListener("change", () => {
+      priceList[idx].price = Number(priceInput.value) || 0;
+    });
+
+    // Note input change
+    const noteInput = tr.querySelectorAll("input")[1];
+    noteInput.addEventListener("change", () => {
+      priceList[idx].note = noteInput.value;
+    });
+
+    // Delete
+    tr.querySelector(".btn-delete-row").addEventListener("click", () => {
+      priceList.splice(idx, 1);
+      renderPriceCategoryFilter();
+      renderPriceListTable();
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  $("priceItemCount").textContent = priceList.length;
+}
+
+function addPriceItem() {
+  const category = priceFilterCategory !== "all" ? priceFilterCategory : "ページ制作";
+  priceList.push({ category, name: "新規項目", price: 0, note: "" });
+  renderPriceCategoryFilter();
+  renderPriceListTable();
+
+  // Scroll to bottom
+  const wrapper = $("priceListTable").closest(".table-wrapper");
+  if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
 }
 
 // =========================================================
