@@ -1,8 +1,18 @@
 // Service Worker for Meta提案拡張機能
+// アイコンクリック → 専用タブで開く（ポップアップではなくタブで動作させ、ページ移動しても作業継続可能）
 
-// インストール時の初期化
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("Meta提案拡張機能がインストールされました");
+chrome.action.onClicked.addListener(async () => {
+  // 既に開いているタブがあればそちらにフォーカス
+  const url = chrome.runtime.getURL("popup.html");
+  const tabs = await chrome.tabs.query({});
+  const existing = tabs.find((t) => t.url === url);
+
+  if (existing) {
+    await chrome.tabs.update(existing.id, { active: true });
+    await chrome.windows.update(existing.windowId, { focused: true });
+  } else {
+    await chrome.tabs.create({ url });
+  }
 });
 
 // メッセージハンドラ（将来の拡張用）

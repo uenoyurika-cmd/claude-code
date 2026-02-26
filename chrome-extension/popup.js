@@ -103,20 +103,35 @@ async function fetchSitemap() {
 
 // ===== 2b. ferret One CMS ページ一覧から取得 =====
 async function fetchFromCms() {
-  setStatus("sitemapStatus", "ferret One のページ一覧を取得中...");
+  setStatus("sitemapStatus", "ferret One のタブを検索中...");
 
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // ferret One の管理画面タブを探す（page_collection ページ）
+    const allTabs = await chrome.tabs.query({});
+    const ferretTab = allTabs.find(
+      (t) => t.url && (t.url.includes("/page_collection") || t.url.includes("ferret-one"))
+    );
+
+    if (!ferretTab) {
+      setStatus(
+        "sitemapStatus",
+        "ferret One の「ページの一括設定」画面を開いたタブが見つかりません。先にそのページを開いてください。",
+        "error"
+      );
+      return;
+    }
+
+    setStatus("sitemapStatus", `ferret One タブ検出 — データ取得中...`);
 
     const injectionResults = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
+      target: { tabId: ferretTab.id },
       func: extractFromFerretOne,
     });
 
     const extracted = injectionResults[0]?.result;
 
     if (!extracted || extracted.length === 0) {
-      setStatus("sitemapStatus", "ページ一覧が見つかりませんでした。ferret One の「ページの一括設定」画面で実行してください。", "error");
+      setStatus("sitemapStatus", "ページ一覧テーブルが見つかりませんでした。「ページの一括設定」画面を表示中か確認してください。", "error");
       return;
     }
 
