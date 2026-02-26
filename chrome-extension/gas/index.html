@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta提案拡張機能 — 社内ガイド</title>
+  <style>
+    /* ========================================
+       Design System — Monochromatic Red
+       ======================================== */
+    :root {
+      --red: #EC2D44;
+      --red-hover: #D21E32;
+      --red-light: #F7E2E5;
+      --red-10: rgba(236, 45, 68, 0.10);
+      --red-20: rgba(236, 45, 68, 0.20);
+      --text: #4A1A1F;
+      --text-light: rgba(74, 26, 31, 0.55);
+      --white: #FFFFFF;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      background: var(--red-light);
+      padding: 80px 24px 72px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--red);
+    }
+    .hero-icon {
+      width: 72px; height: 72px;
+      margin: 0 auto 20px;
+    }
+    .hero-icon svg { width: 100%; height: 100%; }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--red);
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+    }
+    .hero h1 strong { font-weight: 700; }
+    .hero .tagline {
+      font-size: 14px;
+      color: var(--red);
+      opacity: 0.65;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .hero .lead {
+      margin-top: 24px;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--text);
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.85;
+    }
+
+    /* ===== Shared ===== */
+    .section { padding: 72px 24px; }
+    .section:nth-child(even) { background: var(--red-light); }
+    .inner { max-width: 820px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 40px;
+      line-height: 1.4;
+    }
+
+    /* ===== Problem ===== */
+    .problem-list {
+      list-style: none;
+      display: grid;
+      gap: 16px;
+    }
+    .problem-list li {
+      background: var(--white);
+      border-left: 4px solid var(--red);
+      padding: 18px 24px;
+      border-radius: 0 6px 6px 0;
+      font-size: 15px;
+    }
+    .problem-list li strong {
+      color: var(--red);
+    }
+
+    /* ===== Benefits ===== */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 24px;
+    }
+    .benefit-card {
+      background: var(--white);
+      border: 1.5px solid var(--red-20);
+      border-radius: 8px;
+      padding: 28px 24px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .benefit-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px var(--red-10);
+    }
+    .benefit-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--red);
+      color: var(--white);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .benefit-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+    .benefit-card p {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    /* ===== Steps ===== */
+    .steps { counter-reset: step; }
+    .step {
+      display: flex;
+      gap: 28px;
+      margin-bottom: 40px;
+      align-items: flex-start;
+    }
+    .step:last-child { margin-bottom: 0; }
+    .step-marker {
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2.5px solid var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--red);
+      position: relative;
+    }
+    .step-marker.filled {
+      background: var(--red);
+      color: var(--white);
+    }
+    .step-body { flex: 1; }
+    .step-body h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .step-body p {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.75;
+    }
+    .step-connector {
+      width: 2px; height: 24px;
+      background: var(--red-20);
+      margin: -16px 0 -16px 23px;
+      position: relative;
+      z-index: -1;
+    }
+
+    /* ===== Screenshot Placeholder ===== */
+    .screenshot {
+      margin-top: 32px;
+      background: var(--red-light);
+      border: 1.5px solid var(--red-20);
+      border-radius: 8px;
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* ===== Use Cases ===== */
+    .usecases {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 600px) {
+      .usecases { grid-template-columns: 1fr; }
+    }
+    .usecase {
+      background: var(--red-light);
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .usecase-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      background: var(--red);
+      border-radius: 3px;
+      padding: 3px 10px;
+      margin-bottom: 10px;
+    }
+    .usecase h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .usecase p {
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    /* ===== Install ===== */
+    .install-steps {
+      list-style: none;
+      counter-reset: install;
+    }
+    .install-steps li {
+      counter-increment: install;
+      padding: 14px 20px 14px 56px;
+      margin-bottom: 10px;
+      background: var(--white);
+      border-radius: 6px;
+      border: 1px solid var(--red-20);
+      position: relative;
+      font-size: 14px;
+    }
+    .install-steps li::before {
+      content: counter(install);
+      position: absolute;
+      left: 18px; top: 50%;
+      transform: translateY(-50%);
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--red);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .install-steps li code {
+      background: var(--red-light);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+      color: var(--red);
+    }
+
+    /* ===== FAQ ===== */
+    .faq-item {
+      border-bottom: 1px solid var(--red-20);
+      padding: 20px 0;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      gap: 10px;
+    }
+    .faq-q::before {
+      content: "Q";
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--red);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .faq-a {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.75;
+      padding-left: 34px;
+    }
+
+    /* ===== CTA ===== */
+    .cta {
+      background: var(--red);
+      padding: 64px 24px;
+      text-align: center;
+      color: var(--white);
+    }
+    .cta h2 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .cta p {
+      font-size: 15px;
+      opacity: 0.85;
+      margin-bottom: 32px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.75;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: var(--white);
+      color: var(--red);
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      text-align: center;
+      padding: 28px 24px;
+      font-size: 12px;
+      color: var(--text-light);
+      background: var(--red-light);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Hero ===== -->
+  <header class="hero">
+    <div class="hero-icon">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="34" height="34" rx="4" stroke="#EC2D44" stroke-width="1.5" fill="#F7E2E5"/>
+        <path d="M8 28V8L14 20L18 12L22 20L28 8V28" stroke="#EC2D44" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <h1><strong>Meta</strong> 提案拡張機能</h1>
+    <p class="tagline">SEO Title / Description Optimizer for ferret One</p>
+    <p class="lead">
+      ferret One の全ページの Title・Description を<br>
+      AI が一括分析し、SEO 改善提案を自動生成する Chrome 拡張機能です。
+    </p>
+  </header>
+
+  <!-- ===== Problem ===== -->
+  <div class="section">
+    <div class="inner">
+      <p class="section-label">Background</p>
+      <h2 class="section-title">こんな課題はありませんか？</h2>
+      <ul class="problem-list">
+        <li><strong>ページが増えるたびに</strong> Title / Description の確認・修正が追いつかない</li>
+        <li><strong>手動でのチェックは</strong> 1ページずつ開いて確認する必要があり、膨大な時間がかかる</li>
+        <li><strong>SEO の改善ポイントが</strong> 分からず、何を直せばいいか判断に迷う</li>
+        <li><strong>CSV で管理したいが</strong> データの収集と整形に手間がかかる</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== Benefits ===== -->
+  <div class="section">
+    <div class="inner">
+      <p class="section-label">Benefits</p>
+      <h2 class="section-title">この拡張機能で解決できること</h2>
+      <div class="benefits">
+        <div class="benefit-card">
+          <div class="benefit-num">1</div>
+          <h3>ワンクリックで全ページ取得</h3>
+          <p>ferret One の「ページの一括設定」画面からボタン1つで全ページのURL・タイトル・公開ステータスを取得</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">2</div>
+          <h3>AI が改善案を自動生成</h3>
+          <p>OpenAI GPT-4o-mini が各ページの Title / Description を分析し、SEO 改善案と理由を提案</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">3</div>
+          <h3>CSV 一括書き出し</h3>
+          <p>現在の値と提案値をExcel対応のCSVで出力。そのまま共有・レビュー・一括更新に使える</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== How to Use ===== -->
+  <div class="section">
+    <div class="inner">
+      <p class="section-label">How to Use</p>
+      <h2 class="section-title">使い方（5ステップ）</h2>
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-marker filled">1</div>
+          <div class="step-body">
+            <h3>OpenAI API Key を設定</h3>
+            <p>拡張機能を開き、OpenAI の API Key を入力して「保存」をクリック。<br>
+            API Key は Chrome のローカルストレージに保存され、外部には送信されません。</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+
+        <div class="step">
+          <div class="step-marker filled">2</div>
+          <div class="step-body">
+            <h3>ferret One からページ一覧を取得</h3>
+            <p>別タブで ferret One の<strong>「ページの一括設定」</strong>画面を開いた状態で、拡張機能の「ferret One から取得」ボタンをクリック。<br>
+            自動的にテーブルからURL・タイトル・公開ステータスを抽出します。<br>
+            サイトマップ URL からの取得にも対応しています。</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+
+        <div class="step">
+          <div class="step-marker">3</div>
+          <div class="step-body">
+            <h3>Title / Description を取得</h3>
+            <p>対象ページにチェックを入れ「選択ページの TD 取得」ボタンをクリック。<br>
+            各ページの HTML から title タグと meta description を自動取得します。</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+
+        <div class="step">
+          <div class="step-marker">4</div>
+          <div class="step-body">
+            <h3>AI 提案を生成</h3>
+            <p>「AI 提案を生成」ボタンで、全選択ページの改善案を一括生成。<br>
+            1ページあたり約3〜5秒で処理が完了します。進捗バーで状況を確認できます。</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+
+        <div class="step">
+          <div class="step-marker">5</div>
+          <div class="step-body">
+            <h3>CSV で書き出し</h3>
+            <p>「CSV 書き出し」ボタンで、現在の Title / Description と AI 提案をまとめてダウンロード。<br>
+            Excel で開いてチームレビューや一括更新作業にそのまま活用できます。</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="screenshot">
+        ※ ここに拡張機能のスクリーンショットを配置
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Use Cases ===== -->
+  <div class="section">
+    <div class="inner">
+      <p class="section-label">Use Cases</p>
+      <h2 class="section-title">活用シーン</h2>
+      <div class="usecases">
+        <div class="usecase">
+          <span class="usecase-tag">定期運用</span>
+          <h3>月次 SEO レビュー</h3>
+          <p>毎月の SEO チェック業務で、全ページの TD を一括取得・AI分析。改善ポイントをCSVで共有し、チーム全体の SEO 品質を底上げ。</p>
+        </div>
+        <div class="usecase">
+          <span class="usecase-tag">新規制作</span>
+          <h3>サイト公開前の TD 最適化</h3>
+          <p>新しいサイトやページをリリースする前に、全ページの TD をまとめてチェック。公開前に SEO を担保。</p>
+        </div>
+        <div class="usecase">
+          <span class="usecase-tag">提案資料</span>
+          <h3>クライアントへの改善提案</h3>
+          <p>CSV をもとに改善提案書を作成。「現在 → 提案」の比較表がそのまま資料になるため、提案準備の工数を大幅削減。</p>
+        </div>
+        <div class="usecase">
+          <span class="usecase-tag">教育</span>
+          <h3>SEO ナレッジの共有</h3>
+          <p>AI の改善理由を参考にすることで、「なぜこう書くべきか」が学べる教材として活用。新人のSEOスキルアップに。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Install ===== -->
+  <div class="section">
+    <div class="inner">
+      <p class="section-label">Installation</p>
+      <h2 class="section-title" id="install">導入手順</h2>
+      <ol class="install-steps">
+        <li>社内リポジトリから <code>chrome-extension</code> フォルダをダウンロード</li>
+        <li>Chrome で <code>chrome://extensions</code> を開く</li>
+        <li>右上の「デベロッパーモード」を ON にする</li>
+        <li>「パッケージ化されていない拡張機能を読み込む」をクリック</li>
+        <li>ダウンロードした <code>chrome-extension</code> フォルダを選択</li>
+        <li>ツールバーに赤い M アイコンが表示されたらインストール完了</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <div class="section">
+    <div class="inner">
+      <p class="section-label">FAQ</p>
+      <h2 class="section-title">よくある質問</h2>
+
+      <div class="faq-item">
+        <div class="faq-q">OpenAI の API Key はどこで取得できますか？</div>
+        <p class="faq-a">OpenAI のアカウントで <code>platform.openai.com</code> にログインし、API Keys ページから発行できます。社内で共有キーが発行されている場合はそちらをご利用ください。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">API の利用料金はどのくらいかかりますか？</div>
+        <p class="faq-a">GPT-4o-mini を使用しており、1ページあたり約 0.1〜0.3円 程度です。100ページで約10〜30円が目安です。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">AI の処理中にページを移動しても大丈夫ですか？</div>
+        <p class="faq-a">はい。拡張機能は専用タブで動作するため、他のタブを閉じたり移動しても処理は継続します。ferret One のデータ取得後は ferret One タブを閉じても問題ありません。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">ferret One 以外のサイトでも使えますか？</div>
+        <p class="faq-a">はい。「サイトマップから取得」機能で、任意のサイトの sitemap.xml URL を入力すれば利用できます。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">データはどこかに送信されますか？</div>
+        <p class="faq-a">API Key はブラウザのローカルストレージに保存されます。ページのURL・Title・Description は AI 提案生成時に OpenAI API へ送信されます。それ以外の外部サーバーへの送信はありません。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CTA ===== -->
+  <div class="cta">
+    <h2>さっそく使ってみましょう</h2>
+    <p>導入は 5 分で完了。ページ数が多いサイトほど効果を実感できます。</p>
+    <a class="cta-btn" href="javascript:void(0)" onclick="document.getElementById('install').scrollIntoView({behavior:'smooth'})">導入手順を見る</a>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    Meta提案拡張機能 v1.1 — 社内ツール
+  </footer>
+
+</body>
+</html>
