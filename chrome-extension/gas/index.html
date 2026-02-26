@@ -218,7 +218,7 @@
     /* ===== Use Cases ===== */
     .usecases {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
     }
     @media (max-width: 600px) {
@@ -383,10 +383,11 @@
       </svg>
     </div>
     <h1><strong>Meta</strong> 提案拡張機能</h1>
-    <p class="tagline">SEO Title / Description Optimizer for ferret One</p>
+    <p class="tagline">TD改善 & サイト改善見積もり for ferret One</p>
     <p class="lead">
-      ferret One の全ページの Title・Description を<br>
-      AI が一括分析し、SEO 改善提案を自動生成する Chrome 拡張機能です。
+      ferret One のページを AI が分析し、TD 改善提案や<br>
+      松竹梅の見積もりを自動生成する Chrome 拡張機能です。<br>
+      自社単価表に基づいた正確な見積もり作成も可能です。
     </p>
   </header>
 
@@ -399,7 +400,8 @@
         <li><strong>ページが増えるたびに</strong> Title / Description の確認・修正が追いつかない</li>
         <li><strong>手動でのチェックは</strong> 1ページずつ開いて確認する必要があり、膨大な時間がかかる</li>
         <li><strong>SEO の改善ポイントが</strong> 分からず、何を直せばいいか判断に迷う</li>
-        <li><strong>CSV で管理したいが</strong> データの収集と整形に手間がかかる</li>
+        <li><strong>見積もり作成に時間がかかる</strong> ページ構成に応じた松竹梅の提案を手作業で作るのは非効率</li>
+        <li><strong>単価の計算ミスが不安</strong> 自社の複雑な料金表を手動で参照して見積もるため、ミスが起こりやすい</li>
       </ul>
     </div>
   </div>
@@ -412,18 +414,28 @@
       <div class="benefits">
         <div class="benefit-card">
           <div class="benefit-num">1</div>
-          <h3>ワンクリックで全ページ取得</h3>
-          <p>ferret One の「ページの一括設定」画面からボタン1つで全ページのURL・タイトル・公開ステータスを取得</p>
+          <h3>2つのモードを搭載</h3>
+          <p>TD改善モードと提案見積もりモードを切り替え可能。目的に応じて最適な機能を使い分けられます</p>
         </div>
         <div class="benefit-card">
           <div class="benefit-num">2</div>
           <h3>AI が改善案を自動生成</h3>
-          <p>OpenAI GPT-4o-mini が各ページの Title / Description を分析し、SEO 改善案と理由を提案</p>
+          <p>OpenAI GPT-4o-mini がページを分析。TD改善案のほか、デザイン・UX・SEO等の包括的な改善提案を生成</p>
         </div>
         <div class="benefit-card">
           <div class="benefit-num">3</div>
+          <h3>松竹梅の見積もり自動作成</h3>
+          <p>AIがサイト構成を分析し、プレミアム・スタンダード・ライトの3プランの見積もりを自動生成</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">4</div>
+          <h3>自社単価表でカスタマイズ</h3>
+          <p>約100項目の自社料金表をデフォルト搭載。単価の編集・項目追加・見積ルールの変更も自由自在</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-num">5</div>
           <h3>CSV 一括書き出し</h3>
-          <p>現在の値と提案値をExcel対応のCSVで出力。そのまま共有・レビュー・一括更新に使える</p>
+          <p>TD提案も見積もりもExcel対応のCSVで出力。そのまま共有・レビュー・提案書作成に使えます</p>
         </div>
       </div>
     </div>
@@ -433,7 +445,7 @@
   <div class="section">
     <div class="inner">
       <p class="section-label">How to Use</p>
-      <h2 class="section-title">使い方（5ステップ）</h2>
+      <h2 class="section-title">使い方</h2>
       <div class="steps">
 
         <div class="step">
@@ -449,10 +461,9 @@
         <div class="step">
           <div class="step-marker filled">2</div>
           <div class="step-body">
-            <h3>ferret One からページ一覧を取得</h3>
-            <p>別タブで ferret One の<strong>「ページの一括設定」</strong>画面を開いた状態で、拡張機能の「ferret One から取得」ボタンをクリック。<br>
-            自動的にテーブルからURL・タイトル・公開ステータスを抽出します。<br>
-            サイトマップ URL からの取得にも対応しています。</p>
+            <h3>モードを選択</h3>
+            <p><strong>TD改善モード</strong>：全ページの Title / Description を AI が分析し、SEO 改善案を生成。<br>
+            <strong>提案見積もりモード</strong>：サイト構成に基づき、松竹梅の3プランで見積もりを自動作成。</p>
           </div>
         </div>
         <div class="step-connector"></div>
@@ -460,9 +471,9 @@
         <div class="step">
           <div class="step-marker">3</div>
           <div class="step-body">
-            <h3>Title / Description を取得</h3>
-            <p>対象ページにチェックを入れ「選択ページの TD 取得」ボタンをクリック。<br>
-            各ページの HTML から title タグと meta description を自動取得します。</p>
+            <h3>ページ一覧を取得</h3>
+            <p>ferret One の<strong>「ページの一括設定」</strong>画面から自動取得、サイトマップ URL から取得、<br>
+            または手動でページリストを入力できます。対象ページを選択してください。</p>
           </div>
         </div>
         <div class="step-connector"></div>
@@ -470,9 +481,9 @@
         <div class="step">
           <div class="step-marker">4</div>
           <div class="step-body">
-            <h3>AI 提案を生成</h3>
-            <p>「AI 提案を生成」ボタンで、全選択ページの改善案を一括生成。<br>
-            1ページあたり約3〜5秒で処理が完了します。進捗バーで状況を確認できます。</p>
+            <h3>単価設定を確認（見積もりモード）</h3>
+            <p>自社の料金表がデフォルトで約100項目登録済み。<br>
+            単価の変更、項目の追加・削除、ディレクション費率の調整なども可能です。</p>
           </div>
         </div>
         <div class="step-connector"></div>
@@ -480,9 +491,19 @@
         <div class="step">
           <div class="step-marker">5</div>
           <div class="step-body">
+            <h3>AI 提案を生成</h3>
+            <p>TD改善モードでは各ページの改善案を、見積もりモードでは松竹梅3プランの見積もりを AI が自動生成。<br>
+            見積もり結果は数量・単価を手動で調整でき、項目の追加・削除も可能です。</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+
+        <div class="step">
+          <div class="step-marker">6</div>
+          <div class="step-body">
             <h3>CSV で書き出し</h3>
-            <p>「CSV 書き出し」ボタンで、現在の Title / Description と AI 提案をまとめてダウンロード。<br>
-            Excel で開いてチームレビューや一括更新作業にそのまま活用できます。</p>
+            <p>TD改善案や見積もりの結果を CSV でダウンロード。<br>
+            Excel で開いてチームレビューや提案書作成にそのまま活用できます。</p>
           </div>
         </div>
 
@@ -502,14 +523,24 @@
           <p>毎月の SEO チェック業務で、全ページの TD を一括取得・AI分析。改善ポイントをCSVで共有し、チーム全体の SEO 品質を底上げ。</p>
         </div>
         <div class="usecase">
-          <span class="usecase-tag">新規制作</span>
-          <h3>サイト公開前の TD 最適化</h3>
-          <p>新しいサイトやページをリリースする前に、全ページの TD をまとめてチェック。公開前に SEO を担保。</p>
+          <span class="usecase-tag">見積もり</span>
+          <h3>松竹梅の提案見積もり作成</h3>
+          <p>サイトマップやページリストから松竹梅3プランの見積もりを自動生成。自社単価表ベースで正確な金額を算出し、提案準備の工数を大幅削減。</p>
         </div>
         <div class="usecase">
           <span class="usecase-tag">提案資料</span>
           <h3>クライアントへの改善提案</h3>
-          <p>CSV をもとに改善提案書を作成。「現在 → 提案」の比較表がそのまま資料になるため、提案準備の工数を大幅削減。</p>
+          <p>TD改善案のCSVや松竹梅見積もりCSVをそのまま提案書に活用。デザイン・UX・SEO等の包括的な改善案も含め、説得力のある資料を作成。</p>
+        </div>
+        <div class="usecase">
+          <span class="usecase-tag">新規制作</span>
+          <h3>新規サイト制作の見積もり</h3>
+          <p>作成予定のページリストを入力するだけで、ページ制作・デザイン・JSパーツ等の費用を自動算出。手動計算のミスを防ぎスピーディーに見積もりを提出。</p>
+        </div>
+        <div class="usecase">
+          <span class="usecase-tag">単価管理</span>
+          <h3>料金表の一元管理</h3>
+          <p>自社の料金表を拡張機能内で管理。単価の変更やメニューの追加もすぐに反映され、常に最新の料金で見積もりを作成できます。</p>
         </div>
         <div class="usecase">
           <span class="usecase-tag">教育</span>
@@ -576,19 +607,34 @@
         <div class="faq-q">データはどこかに送信されますか？</div>
         <p class="faq-a">API Key はブラウザのローカルストレージに保存されます。ページのURL・Title・Description は AI 提案生成時に OpenAI API へ送信されます。それ以外の外部サーバーへの送信はありません。</p>
       </div>
+
+      <div class="faq-item">
+        <div class="faq-q">松竹梅の見積もりとは何ですか？</div>
+        <p class="faq-a">松（プレミアム）・竹（スタンダード）・梅（ライト）の3段階の提案プランです。松はデザインリニューアルや競合分析を含む包括プラン、竹はバランスの良い中間プラン、梅はTD修正等の最小限プランです。クライアントの予算に応じた提案が可能です。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">単価表はカスタマイズできますか？</div>
+        <p class="faq-a">はい。見積もりモードの「単価設定」パネルから、約100項目の単価を自由に編集できます。新しいメニュー項目の追加、不要な項目の削除、ディレクション費率や時間単価の変更も可能です。変更は「単価を保存」ボタンで保持され、「デフォルトに戻す」でいつでも初期値に戻せます。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">見積もりの金額は手動で調整できますか？</div>
+        <p class="faq-a">はい。AI が生成した見積もりの数量・単価はすべて編集可能です。項目の追加・削除もでき、小計と合計はリアルタイムで再計算されます。最終的な調整後にCSV書き出しが可能です。</p>
+      </div>
     </div>
   </div>
 
   <!-- ===== CTA ===== -->
   <div class="cta">
     <h2>さっそく使ってみましょう</h2>
-    <p>導入は 5 分で完了。ページ数が多いサイトほど効果を実感できます。</p>
+    <p>導入は 5 分で完了。TD改善も見積もり作成も、AIがまとめて自動化します。</p>
     <a href="https://drive.google.com/drive/folders/1Fb8bnp_lW5e6Pqz0qlfGiHBRgkV23JGK" target="_blank" rel="noopener" class="cta-btn" style="text-decoration:none;">共有ドライブからダウンロード</a>
   </div>
 
   <!-- ===== Footer ===== -->
   <footer>
-    Meta提案拡張機能 v1.1 — 社内ツール
+    Meta提案拡張機能 v2.0.0 — 社内ツール
   </footer>
 
 
