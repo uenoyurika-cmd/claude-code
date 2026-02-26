@@ -1,6 +1,6 @@
 // ===== State =====
-let pages = []; // { url, title, description, selected }
-let results = []; // { url, currentTitle, suggestedTitle, currentDesc, suggestedDesc, reason }
+let pages = []; // { url, path, title, description, status, noIndex, selected }
+let results = []; // { url, path, currentTitle, suggestedTitle, currentDesc, suggestedDesc, reason }
 
 // ===== DOM Elements =====
 const $ = (id) => document.getElementById(id);
@@ -36,7 +36,7 @@ async function saveApiKey() {
   setStatus("apiKeyStatus", "API Key を保存しました", "success");
 }
 
-// ===== 2. サイトマップ取得 =====
+// ===== 2a. サイトマップ取得 =====
 async function fetchSitemap() {
   const url = $("sitemapUrl").value.trim();
   if (!url) {
@@ -81,12 +81,18 @@ async function fetchSitemap() {
       return;
     }
 
-    pages = urls.map((u) => ({
-      url: u,
-      title: "",
-      description: "",
-      selected: true,
-    }));
+    pages = urls.map((u) => {
+      const parsed = new URL(u);
+      return {
+        url: u,
+        path: parsed.pathname,
+        title: "",
+        description: "",
+        status: "",
+        noIndex: "",
+        selected: true,
+      };
+    });
 
     renderPagesTable();
     setStatus("sitemapStatus", `${urls.length} ページを検出しました`, "success");
@@ -95,68 +101,84 @@ async function fetchSitemap() {
   }
 }
 
-// ===== 2b. CMSページからリンク取得 =====
+// ===== 2b. ferret One CMS ページ一覧から取得 =====
 async function fetchFromCms() {
-  setStatus("sitemapStatus", "現在のページからリンクを取得中...");
+  setStatus("sitemapStatus", "ferret One のページ一覧を取得中...");
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     const injectionResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: extractLinksFromPage,
+      func: extractFromFerretOne,
     });
 
-    const urls = injectionResults[0]?.result || [];
+    const extracted = injectionResults[0]?.result;
 
-    if (urls.length === 0) {
-      setStatus("sitemapStatus", "リンクが見つかりませんでした", "error");
+    if (!extracted || extracted.length === 0) {
+      setStatus("sitemapStatus", "ページ一覧が見つかりませんでした。ferret One の「ページの一括設定」画面で実行してください。", "error");
       return;
     }
 
-    pages = urls.map((u) => ({
-      url: u,
-      title: "",
+    pages = extracted.map((p) => ({
+      ...p,
       description: "",
       selected: true,
     }));
 
     renderPagesTable();
-    setStatus("sitemapStatus", `${urls.length} ページを検出しました`, "success");
+    setStatus(
+      "sitemapStatus",
+      `ferret One から ${pages.length} ページを検出しました（タイトル取得済み）`,
+      "success"
+    );
+
+    // ferret One から取得した場合、タイトルは既にあるのでTD取得ボタンを有効化
+    $("fetchMeta").disabled = false;
   } catch (e) {
     setStatus("sitemapStatus", `取得エラー: ${e.message}`, "error");
   }
 }
 
-// Content script: ページ内のリンクを抽出
-function extractLinksFromPage() {
-  const links = document.querySelectorAll("a[href]");
-  const currentOrigin = location.origin;
-  const seen = new Set();
+// ===== ferret One 専用: ページ一括設定テーブルからデータ抽出 =====
+function extractFromFerretOne() {
+  // ferret One の「ページの一括設定」テーブルを検出
+  // 構造: table.table.new-table > tbody > tr
+  //   td[0]: checkbox
+  //   td[1]: <a href="https://xxx.hmup.jp/path">/path</a>
+  //   td[2]: タイトル
+  //   td[3]: 公開ステータス
+  //   td[4]: 公開日時
+  //   td[5]: No Indexタグ
+  const table = document.querySelector("table.js-sortable") ||
+                document.querySelector("table.new-table") ||
+                document.querySelector("table.table-hover");
+
+  if (!table) return [];
+
+  const rows = table.querySelectorAll("tbody tr");
   const result = [];
 
-  links.forEach((a) => {
-    try {
-      const url = new URL(a.href, location.href);
-      // 同一ドメインのHTTPリンクのみ
-      if (
-        url.origin === currentOrigin &&
-        url.protocol.startsWith("http") &&
-        !url.hash &&
-        !seen.has(url.pathname)
-      ) {
-        seen.add(url.pathname);
-        result.push(url.href);
-      }
-    } catch {
-      // invalid URL
-    }
+  rows.forEach((tr) => {
+    const cells = tr.querySelectorAll("td");
+    if (cells.length < 4) return;
+
+    const linkEl = cells[1]?.querySelector("a[href]");
+    if (!linkEl) return;
+
+    const url = linkEl.href;
+    const path = linkEl.textContent.trim();
+    const title = cells[2]?.textContent?.trim() || "";
+    const status = cells[3]?.textContent?.trim() || "";
+    const noIndex = cells.length >= 6 ? cells[5]?.textContent?.trim() || "" : "";
+
+    result.push({ url, path, title, status, noIndex });
   });
 
   return result;
 }
 
-// ===== 3. TD取得 =====
+// ===== 3. TD取得（各ページのHTMLから description を取得） =====
 async function fetchMetaFromPages() {
   const selected = pages.filter((p) => p.selected);
   if (selected.length === 0) {
@@ -181,13 +203,17 @@ async function fetchMetaFromPages() {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, "text/html");
 
-          page.title = doc.querySelector("title")?.textContent?.trim() || "";
+          // タイトルが未取得の場合のみ更新
+          if (!page.title) {
+            page.title = doc.querySelector("title")?.textContent?.trim() || "";
+          }
+
           const metaDesc =
             doc.querySelector('meta[name="description"]') ||
             doc.querySelector('meta[property="og:description"]');
           page.description = metaDesc?.getAttribute("content")?.trim() || "";
         } catch {
-          page.title = "(取得失敗)";
+          if (!page.title) page.title = "(取得失敗)";
           page.description = "(取得失敗)";
         }
         completed++;
@@ -212,9 +238,9 @@ async function generateAiSuggestions() {
     return;
   }
 
-  const selected = pages.filter((p) => p.selected && p.title);
+  const selected = pages.filter((p) => p.selected && (p.title || p.url));
   if (selected.length === 0) {
-    setStatus("aiStatus", "メタ情報を先に取得してください", "error");
+    setStatus("aiStatus", "対象ページがありません", "error");
     return;
   }
 
@@ -230,6 +256,7 @@ async function generateAiSuggestions() {
       const suggestion = await callOpenAI(apiKey, page);
       results.push({
         url: page.url,
+        path: page.path || "",
         currentTitle: page.title,
         suggestedTitle: suggestion.title,
         currentDesc: page.description,
@@ -239,6 +266,7 @@ async function generateAiSuggestions() {
     } catch (e) {
       results.push({
         url: page.url,
+        path: page.path || "",
         currentTitle: page.title,
         suggestedTitle: "(エラー)",
         currentDesc: page.description,
@@ -264,8 +292,9 @@ async function callOpenAI(apiKey, page) {
   const prompt = `あなたはSEOの専門家です。以下のWebページのTitle（タイトルタグ）とDescription（メタディスクリプション）を分析し、SEO効果を最大化する改善案を提案してください。
 
 【URL】${page.url}
-【現在のTitle】${page.title}
-【現在のDescription】${page.description}
+【パス】${page.path || ""}
+【現在のTitle】${page.title || "(未設定)"}
+【現在のDescription】${page.description || "(未設定)"}
 
 以下のJSON形式で回答してください（日本語で回答）:
 {
@@ -310,6 +339,7 @@ function exportCsv() {
 
   const headers = [
     "URL",
+    "パス",
     "現在のTitle",
     "提案Title",
     "現在のDescription",
@@ -319,6 +349,7 @@ function exportCsv() {
 
   const rows = results.map((r) => [
     r.url,
+    r.path,
     r.currentTitle,
     r.suggestedTitle,
     r.currentDesc,
@@ -359,9 +390,10 @@ function renderPagesTable() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><input type="checkbox" data-index="${i}" ${page.selected ? "checked" : ""} /></td>
-      <td title="${escapeHtml(page.url)}">${escapeHtml(truncate(page.url, 40))}</td>
-      <td title="${escapeHtml(page.title)}">${escapeHtml(truncate(page.title, 30))}</td>
-      <td title="${escapeHtml(page.description)}">${escapeHtml(truncate(page.description, 30))}</td>
+      <td title="${escapeHtml(page.url)}">${escapeHtml(page.path || truncate(page.url, 30))}</td>
+      <td title="${escapeHtml(page.title)}">${escapeHtml(truncate(page.title, 30)) || '<span style="opacity:0.35">(未設定)</span>'}</td>
+      <td title="${escapeHtml(page.description)}">${escapeHtml(truncate(page.description, 30)) || '<span style="opacity:0.35">—</span>'}</td>
+      <td>${escapeHtml(page.status || "")}</td>
     `;
     tr.querySelector("input").addEventListener("change", (e) => {
       pages[i].selected = e.target.checked;
@@ -380,7 +412,7 @@ function renderResultsTable() {
   results.forEach((r) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td title="${escapeHtml(r.url)}">${escapeHtml(truncate(r.url, 30))}</td>
+      <td title="${escapeHtml(r.url)}">${escapeHtml(r.path || truncate(r.url, 25))}</td>
       <td title="${escapeHtml(r.currentTitle)}">${escapeHtml(truncate(r.currentTitle, 25))}</td>
       <td title="${escapeHtml(r.suggestedTitle)}">${escapeHtml(truncate(r.suggestedTitle, 25))}</td>
       <td title="${escapeHtml(r.currentDesc)}">${escapeHtml(truncate(r.currentDesc, 25))}</td>
@@ -405,6 +437,7 @@ function setStatus(id, message, type = "") {
 }
 
 function escapeHtml(str) {
+  if (!str) return "";
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;

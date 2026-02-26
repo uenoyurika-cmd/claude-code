@@ -39,8 +39,9 @@
       </div>
       <div class="btn-group">
         <button id="fetchSitemap" class="btn btn-primary">サイトマップから取得</button>
-        <button id="fetchFromCms" class="btn btn-primary">現在のページから取得</button>
+        <button id="fetchFromCms" class="btn btn-accent">ferret One から取得</button>
       </div>
+      <p class="hint">ferret One の「ページの一括設定」画面で実行してください</p>
       <p class="status" id="sitemapStatus"></p>
     </section>
 
@@ -52,9 +53,10 @@
           <thead>
             <tr>
               <th><input type="checkbox" id="selectAll" checked /></th>
-              <th>URL</th>
+              <th>パス</th>
               <th>Title</th>
               <th>Description</th>
+              <th>公開</th>
             </tr>
           </thead>
           <tbody id="pagesTableBody">
@@ -84,7 +86,7 @@
         <table id="resultsTable">
           <thead>
             <tr>
-              <th>URL</th>
+              <th>パス</th>
               <th>現在のTitle</th>
               <th>提案Title</th>
               <th>現在のDesc</th>
