@@ -1,3 +1,6 @@
+// ===== GAS Web App URL (固定) =====
+const GAS_URL = "https://script.google.com/a/macros/basicinc.jp/s/AKfycbw4tpV0t7rVv14fcaFbGWprsEFatg94lGKB9CzDEnBIoHo1UYE3M3pRoHN3rYLbizDOUw/exec";
+
 // ===== Default Price List =====
 const DEFAULT_PRICE_LIST = [
   // --- ページ制作（通常・ディレクション費20%） ---
@@ -164,16 +167,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("apiKeyStatus").className = "status success";
   }
 
-  // Load saved GAS URL
-  const storedGas = await chrome.storage.local.get("gasUrl");
-  if (storedGas.gasUrl) {
-    $("gasUrl").value = storedGas.gasUrl;
-    setStatus("gasUrlStatus", "GAS URL 設定済み", "success");
-  }
-
   // Shared
   $("saveApiKey").addEventListener("click", saveApiKey);
-  $("saveGasUrl").addEventListener("click", saveGasUrl);
 
   // Mode selection
   $("modeCardTd").addEventListener("click", () => selectMode("td"));
@@ -866,27 +861,8 @@ function renderPlanSummaries() {
   container.style.display = hasAny ? "" : "none";
 }
 
-// ===== GAS URL 保存 =====
-async function saveGasUrl() {
-  const url = $("gasUrl").value.trim();
-  if (!url) {
-    setStatus("gasUrlStatus", "GAS URL を入力してください", "error");
-    return;
-  }
-  await chrome.storage.local.set({ gasUrl: url });
-  setStatus("gasUrlStatus", "GAS URL を保存しました", "success");
-}
-
 // ===== Google Slides 出力 =====
 async function exportToGoogleSlides() {
-  const stored = await chrome.storage.local.get("gasUrl");
-  const gasUrl = stored.gasUrl;
-
-  if (!gasUrl) {
-    setStatus("estAiStatus", "Googleスライド出力には GAS URL の設定が必要です（Step 1 で設定）", "error");
-    return;
-  }
-
   if (estimateItems.length === 0) {
     setStatus("estAiStatus", "見積もりデータがありません", "error");
     return;
@@ -909,7 +885,7 @@ async function exportToGoogleSlides() {
   };
 
   try {
-    const response = await fetch(gasUrl, {
+    const response = await fetch(GAS_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload),

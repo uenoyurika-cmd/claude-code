@@ -50,14 +50,21 @@ function doPost(e) {
 //  Google スライド提案書 生成
 // =========================================================
 
+// ===== PANTONE 2021 — Illuminating Yellow × Ultimate Gray =====
 var COLORS_ = {
-  RED: '#EC2D44',
-  DARK: '#4A1A1F',
-  LIGHT: '#F7E2E5',
+  PRIMARY: '#F5DF4D',       // Illuminating Yellow — CTA, active, accent
+  PRIMARY_10: '#FBF5D2',    // Yellow 10% for light backgrounds
+  PRIMARY_15: '#F9F0C0',    // Yellow 15% for hover/glow
+  SECONDARY: '#939597',     // Ultimate Gray — sub text, borders
+  DARK: '#333333',          // Main text
+  SUB: '#666666',           // Sub text
+  MUTED: '#999999',         // Muted text
   WHITE: '#FFFFFF',
-  MATSU_BG: '#FFF8E1', MATSU: '#B8860B',
-  TAKE_BG: '#E8F5E9',  TAKE: '#2E7D32',
-  UME_BG: '#FFF3E0',   UME: '#E65100',
+  BG_SIDE: '#F0F0F2',      // Sidebar / secondary
+  BG_SEC: '#F7F7F8',       // Secondary background
+  MATSU_BG: '#FBF5D2', MATSU: '#8B7A2B',  // Gold-yellow tone
+  TAKE_BG: '#F0F0F2',  TAKE: '#555555',   // Gray tone
+  UME_BG: '#F7F7F8',   UME: '#777777',    // Light gray tone
 };
 
 var TIERS_ = {
@@ -72,16 +79,20 @@ function createProposalSlides_(data) {
 
   // ---------- Slide 1: Title ----------
   var s1 = pres.getSlides()[0];
-  s1.getBackground().setSolidFill(COLORS_.LIGHT);
+  s1.getBackground().setSolidFill(COLORS_.BG_SEC);
   clearSlide_(s1);
-  addText_(s1, 'サイト改善\n提案書', 80, 80, 560, 200, COLORS_.RED, 44, true, 'CENTER');
-  addText_(s1, Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy年MM月dd日'), 80, 300, 560, 40, COLORS_.DARK, 18, false, 'CENTER');
+  // Accent line at top
+  addRect_(s1, 0, 0, 720, 6, COLORS_.PRIMARY);
+  addText_(s1, 'サイト改善\n提案書', 80, 80, 560, 200, COLORS_.DARK, 44, true, 'CENTER');
+  addRect_(s1, 280, 290, 160, 4, COLORS_.PRIMARY);
+  addText_(s1, Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy年MM月dd日'), 80, 310, 560, 40, COLORS_.SUB, 18, false, 'CENTER');
 
   // ---------- Slide 2: Overview ----------
   var s2 = pres.appendSlide(SlidesApp.PredefinedLayout.BLANK);
   s2.getBackground().setSolidFill(COLORS_.WHITE);
-  addText_(s2, '提案プラン 概要', 30, 15, 660, 40, COLORS_.RED, 26, true, 'LEFT');
-  addLine_(s2, 30, 55, 690, 55, COLORS_.RED);
+  addRect_(s2, 0, 0, 720, 6, COLORS_.PRIMARY);
+  addText_(s2, '提案プラン 概要', 30, 15, 660, 40, COLORS_.DARK, 26, true, 'LEFT');
+  addLine_(s2, 30, 55, 690, 55, COLORS_.PRIMARY);
 
   var colW = 210, gap = 12, sx = 30, sy = 70;
   var tiers = ['matsu', 'take', 'ume'];
@@ -93,12 +104,14 @@ function createProposalSlides_(data) {
     var x = sx + i * (colW + gap);
 
     addRect_(s2, x, sy, colW, 330, tc.bg);
-    addText_(s2, tc.label, x + 8, sy + 8, colW - 16, 28, tc.fg, 14, true, 'CENTER');
-    addText_(s2, fmtYen_(total), x + 8, sy + 38, colW - 16, 28, COLORS_.RED, 18, true, 'CENTER');
-    addText_(s2, summ.summary || '', x + 8, sy + 72, colW - 16, 55, COLORS_.DARK, 9, false, 'LEFT');
+    // Yellow accent bar at top of each card
+    addRect_(s2, x, sy, colW, 4, COLORS_.PRIMARY);
+    addText_(s2, tc.label, x + 8, sy + 12, colW - 16, 28, tc.fg, 14, true, 'CENTER');
+    addText_(s2, fmtYen_(total), x + 8, sy + 42, colW - 16, 28, COLORS_.DARK, 18, true, 'CENTER');
+    addText_(s2, summ.summary || '', x + 8, sy + 76, colW - 16, 55, COLORS_.SUB, 9, false, 'LEFT');
 
     var pts = (summ.sellingPoints || []).map(function(p) { return '\u2713 ' + p; }).join('\n');
-    addText_(s2, pts, x + 8, sy + 132, colW - 16, 190, COLORS_.DARK, 9, false, 'LEFT');
+    addText_(s2, pts, x + 8, sy + 136, colW - 16, 190, COLORS_.DARK, 9, false, 'LEFT');
   }
 
   // ---------- Slides 3–5: Per-tier detail ----------
@@ -112,26 +125,29 @@ function createProposalSlides_(data) {
     var sl = pres.appendSlide(SlidesApp.PredefinedLayout.BLANK);
     sl.getBackground().setSolidFill(COLORS_.WHITE);
 
+    // Yellow accent line at top
+    addRect_(sl, 0, 0, 720, 6, COLORS_.PRIMARY);
+
     // Header bar
-    addRect_(sl, 0, 0, 720, 52, tc.bg);
-    addText_(sl, tc.label, 28, 8, 350, 36, tc.fg, 22, true, 'LEFT');
-    addText_(sl, '合計 ' + fmtYen_(total), 380, 8, 310, 36, COLORS_.RED, 20, true, 'RIGHT');
+    addRect_(sl, 0, 6, 720, 48, tc.bg);
+    addText_(sl, tc.label, 28, 10, 350, 36, tc.fg, 22, true, 'LEFT');
+    addText_(sl, '合計 ' + fmtYen_(total), 380, 10, 310, 36, COLORS_.DARK, 20, true, 'RIGHT');
 
     // Summary
-    addText_(sl, summ.summary || '', 28, 60, 664, 24, COLORS_.DARK, 11, false, 'LEFT');
+    addText_(sl, summ.summary || '', 28, 62, 664, 24, COLORS_.SUB, 11, false, 'LEFT');
 
     // Selling points row
     var sp = summ.sellingPoints || [];
     var spW = sp.length > 0 ? Math.floor(664 / Math.min(sp.length, 4)) : 0;
     for (var p = 0; p < Math.min(sp.length, 4); p++) {
       var px = 28 + p * spW;
-      addRect_(sl, px, 88, spW - 4, 28, COLORS_.LIGHT);
-      addText_(sl, '\u2713 ' + sp[p], px + 4, 90, spW - 12, 24, COLORS_.RED, 9, true, 'LEFT');
+      addRect_(sl, px, 90, spW - 4, 28, COLORS_.PRIMARY_10);
+      addText_(sl, '\u2713 ' + sp[p], px + 4, 92, spW - 12, 24, COLORS_.DARK, 9, true, 'LEFT');
     }
 
     // Table header
-    var ty = 124;
-    addRect_(sl, 28, ty, 664, 20, COLORS_.RED);
+    var ty = 126;
+    addRect_(sl, 28, ty, 664, 20, COLORS_.DARK);
     var cols = [
       { l: 'カテゴリ', w: 90 }, { l: '項目', w: 140 }, { l: '内容', w: 220 },
       { l: '数量', w: 50 }, { l: '単価', w: 82 }, { l: '小計', w: 82 }
@@ -147,7 +163,7 @@ function createProposalSlides_(data) {
     var maxRows = Math.min(items.length, 12);
     for (var r = 0; r < maxRows; r++) {
       var it = items[r];
-      var bgc = r % 2 === 0 ? COLORS_.WHITE : COLORS_.LIGHT;
+      var bgc = r % 2 === 0 ? COLORS_.WHITE : COLORS_.BG_SEC;
       addRect_(sl, 28, ry, 664, 20, bgc);
       var sub = (it.quantity || 0) * (it.unitPrice || 0);
       var vals = [it.category || '', it.item || '', it.description || '', String(it.quantity || 0), fmtYen_(it.unitPrice || 0), fmtYen_(sub)];
@@ -167,8 +183,9 @@ function createProposalSlides_(data) {
   // ---------- Slide 6: Total Comparison ----------
   var sf = pres.appendSlide(SlidesApp.PredefinedLayout.BLANK);
   sf.getBackground().setSolidFill(COLORS_.WHITE);
-  addText_(sf, 'お見積もり金額 比較', 30, 15, 660, 40, COLORS_.RED, 26, true, 'LEFT');
-  addLine_(sf, 30, 55, 690, 55, COLORS_.RED);
+  addRect_(sf, 0, 0, 720, 6, COLORS_.PRIMARY);
+  addText_(sf, 'お見積もり金額 比較', 30, 15, 660, 40, COLORS_.DARK, 26, true, 'LEFT');
+  addLine_(sf, 30, 55, 690, 55, COLORS_.PRIMARY);
 
   for (var i = 0; i < tiers.length; i++) {
     var tier = tiers[i];
@@ -179,10 +196,12 @@ function createProposalSlides_(data) {
     var y = 75 + i * 100;
 
     addRect_(sf, 50, y, 620, 85, tc.bg);
+    // Yellow left accent on each row
+    addRect_(sf, 50, y, 5, 85, COLORS_.PRIMARY);
     addText_(sf, tc.label, 70, y + 8, 250, 30, tc.fg, 20, true, 'LEFT');
-    addText_(sf, fmtYen_(total), 350, y + 4, 300, 36, COLORS_.RED, 28, true, 'RIGHT');
-    addText_(sf, count + ' 項目', 70, y + 42, 200, 20, COLORS_.DARK, 10, false, 'LEFT');
-    addText_(sf, summ.summary || '', 70, y + 60, 580, 18, COLORS_.DARK, 8, false, 'LEFT');
+    addText_(sf, fmtYen_(total), 350, y + 4, 300, 36, COLORS_.DARK, 28, true, 'RIGHT');
+    addText_(sf, count + ' 項目', 70, y + 42, 200, 20, COLORS_.SUB, 10, false, 'LEFT');
+    addText_(sf, summ.summary || '', 70, y + 60, 580, 18, COLORS_.SUB, 8, false, 'LEFT');
   }
 
   return pres.getUrl();
