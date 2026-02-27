@@ -307,31 +307,97 @@ async function fetchFromCms() {
 }
 
 // ===== ferret One 専用: ページ一括設定テーブルからデータ抽出 =====
+// NOTE: この関数は chrome.scripting.executeScript で対象タブに注入されるため、
+//       外部変数を参照できません。関数内で完結している必要があります。
 function extractFromFerretOne() {
-  const table = document.querySelector("table.js-sortable") ||
-                document.querySelector("table.new-table") ||
-                document.querySelector("table.table-hover");
+  // 1. 既知の ferret One テーブルセレクタで検索
+  var table = document.querySelector("table.js-sortable") ||
+              document.querySelector("table.new-table") ||
+              document.querySelector("table.table-hover") ||
+              document.querySelector(".page-collection table") ||
+              document.querySelector("[class*='page'] table");
 
-  if (!table) return [];
+  // 2. フォールバック: リンクを含む tbody 行を持つテーブルを探す
+  if (!table) {
+    var allTables = document.querySelectorAll("table");
+    for (var ti = 0; ti < allTables.length; ti++) {
+      var candidate = allTables[ti];
+      var candidateRows = candidate.querySelectorAll("tbody tr");
+      if (candidateRows.length > 0) {
+        // 少なくとも1行にリンクがあるテーブルをページ一覧と推定
+        for (var ri = 0; ri < Math.min(candidateRows.length, 3); ri++) {
+          if (candidateRows[ri].querySelector("a[href]")) {
+            table = candidate;
+            break;
+          }
+        }
+        if (table) break;
+      }
+    }
+  }
 
-  const rows = table.querySelectorAll("tbody tr");
-  const result = [];
+  if (!table) {
+    // 診断情報を返す（配列ではなくオブジェクト → 呼び出し元で判別）
+    return {
+      __error: "table_not_found",
+      tableCount: document.querySelectorAll("table").length,
+      url: location.href
+    };
+  }
 
-  rows.forEach((tr) => {
-    const cells = tr.querySelectorAll("td");
-    if (cells.length < 4) return;
+  var rows = table.querySelectorAll("tbody tr");
+  if (rows.length === 0) {
+    return {
+      __error: "no_rows",
+      url: location.href
+    };
+  }
 
-    const linkEl = cells[1]?.querySelector("a[href]");
-    if (!linkEl) return;
+  var result = [];
 
-    const url = linkEl.href;
-    const path = linkEl.textContent.trim();
-    const title = cells[2]?.textContent?.trim() || "";
-    const status = cells[3]?.textContent?.trim() || "";
-    const noIndex = cells.length >= 6 ? cells[5]?.textContent?.trim() || "" : "";
+  for (var r = 0; r < rows.length; r++) {
+    var tr = rows[r];
+    var cells = tr.querySelectorAll("td");
+    if (cells.length < 2) continue;
 
-    result.push({ url, path, title, status, noIndex });
-  });
+    // リンクを全セルから探す（列構成が変わっても対応）
+    var linkEl = null;
+    var linkCellIdx = -1;
+    for (var ci = 0; ci < cells.length; ci++) {
+      var anchor = cells[ci].querySelector("a[href]");
+      if (anchor) {
+        linkEl = anchor;
+        linkCellIdx = ci;
+        break;
+      }
+    }
+    if (!linkEl) continue;
+
+    var url = linkEl.href;
+    var path = linkEl.textContent.trim();
+
+    // リンク列以外のテキストを収集（チェックボックスのみの列はスキップ）
+    var otherTexts = [];
+    for (var ci2 = 0; ci2 < cells.length; ci2++) {
+      if (ci2 === linkCellIdx) continue;
+      // チェックボックスのみの列をスキップ
+      var hasCheckbox = cells[ci2].querySelector("input[type='checkbox']");
+      if (hasCheckbox && cells[ci2].textContent.trim() === "") continue;
+      otherTexts.push(cells[ci2].textContent.trim());
+    }
+
+    var title = otherTexts[0] || "";
+    var status = otherTexts[1] || "";
+    var noIndex = otherTexts.length >= 4 ? otherTexts[3] || "" : "";
+
+    result.push({
+      url: url,
+      path: path,
+      title: title,
+      status: status,
+      noIndex: noIndex
+    });
+  }
 
   return result;
 }
@@ -1104,23 +1170,79 @@ async function parseSitemap(url) {
   return urls;
 }
 
-// Shared ferret One extraction
+// Shared ferret One extraction（リトライ＆権限エラー対応）
 async function extractFerretOneData() {
   const allTabs = await chrome.tabs.query({});
-  const ferretTab = allTabs.find(
-    (t) => t.url && (t.url.includes("/page_collection") || t.url.includes("ferret-one"))
-  );
 
+  // 優先順位: page_collection パスが一番確実 → ferret-one ドメイン → ferretone（ハイフンなし）
+  let ferretTab = allTabs.find(
+    (t) => t.url && t.url.includes("/page_collection")
+  );
   if (!ferretTab) {
-    throw new Error("ferret One の「ページの一括設定」画面を開いたタブが見つかりません。先にそのページを開いてください。");
+    ferretTab = allTabs.find((t) => {
+      if (!t.url) return false;
+      const lower = t.url.toLowerCase();
+      return lower.includes("ferret-one") || lower.includes("ferretone");
+    });
   }
 
-  const injectionResults = await chrome.scripting.executeScript({
-    target: { tabId: ferretTab.id },
-    func: extractFromFerretOne,
-  });
+  if (!ferretTab) {
+    throw new Error(
+      "ferret One の「ページの一括設定」画面を開いたタブが見つかりません。\n" +
+      "・ferret One の管理画面を別タブで開いてから再度お試しください\n" +
+      "・拡張機能の「サイトへのアクセス」が「すべてのサイト」になっているか確認してください"
+    );
+  }
 
-  return injectionResults[0]?.result || [];
+  // 動的読み込み対応: 最大3回リトライ（1.5秒間隔）
+  let lastResult = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const injectionResults = await chrome.scripting.executeScript({
+        target: { tabId: ferretTab.id },
+        func: extractFromFerretOne,
+      });
+      lastResult = injectionResults[0]?.result;
+
+      // 正常な配列が返ってきた場合
+      if (Array.isArray(lastResult) && lastResult.length > 0) {
+        return lastResult;
+      }
+
+      // 診断オブジェクトが返ってきた場合（テーブル未検出等）→ リトライ
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    } catch (e) {
+      // 権限エラー → リトライせず即座にユーザーへ案内
+      const msg = e.message || "";
+      if (msg.includes("Cannot access") || msg.includes("permission") || msg.includes("Frame")) {
+        throw new Error(
+          "ferret One ページへのアクセス権限がありません。\n" +
+          "Chrome ツールバーの拡張機能アイコンを右クリック →\n" +
+          "「サイトへのアクセス」→「すべてのサイト」に変更してください。"
+        );
+      }
+      throw new Error("スクリプト実行エラー: " + msg);
+    }
+  }
+
+  // リトライ後も取得できなかった場合 → 診断情報付きエラー
+  if (lastResult && lastResult.__error === "table_not_found") {
+    throw new Error(
+      "ページ一覧テーブルが見つかりませんでした。\n" +
+      "ferret One の「ページの一括設定」画面を表示した状態で実行してください。\n" +
+      "(検出URL: " + (lastResult.url || "不明") + ", テーブル数: " + (lastResult.tableCount || 0) + ")"
+    );
+  }
+  if (lastResult && lastResult.__error === "no_rows") {
+    throw new Error(
+      "テーブルは見つかりましたがデータ行がありません。\n" +
+      "ページが読み込み中の可能性があります。ページを完全に読み込んでから再度お試しください。"
+    );
+  }
+
+  return [];
 }
 
 // Shared OpenAI API call
