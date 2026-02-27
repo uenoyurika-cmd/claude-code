@@ -653,6 +653,30 @@
         <div class="faq-q">Google スライドの提案書はどうやって作成しますか？</div>
         <p class="faq-a">見積もり生成後に「Google スライド作成」ボタンをクリックするだけです。GAS（Google Apps Script）の接続先は拡張機能に組み込み済みなので、追加設定は不要です。タイトル・プラン比較・各プラン明細・合計比較の6枚構成の提案書が自動で作成され、Google ドライブに保存されます。</p>
       </div>
+
+      <div class="faq-item">
+        <div class="faq-q">ferret One からデータを取得できません。どうすればいいですか？</div>
+        <p class="faq-a">以下を順番に確認してください。<br>
+          <strong>① サイトへのアクセス権限：</strong>Chrome ツールバーの拡張機能アイコンを右クリック →「サイトへのアクセス」→「すべてのサイト」に変更してください。これが最も多い原因です。<br>
+          <strong>② 開いているページ：</strong>ferret One の<strong>「ページの一括設定」</strong>画面を開いてください。ダッシュボードやページ編集画面では取得できません。<br>
+          <strong>③ テーブルの読み込み：</strong>ページ一覧テーブルが完全に表示されてからボタンを押してください。読み込み中の場合は自動で最大3回リトライしますが、ネットワークが遅い環境では手動で再試行してください。<br>
+          <strong>④ タブの整理：</strong>同じ ferret One のタブが複数開いている場合、意図しないタブが選択されることがあります。対象サイトのタブを1つだけにしてください。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">「サイトへのアクセス」はどこで変更できますか？</div>
+        <p class="faq-a">Chrome ツールバーの拡張機能アイコン（パズルピースの形）をクリック →「Meta提案拡張機能」の横にある「⋮」→「サイトへのアクセスを管理」から変更できます。または、拡張機能アイコンを直接右クリック →「サイトへのアクセス」→「すべてのサイト」でも設定可能です。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">シークレットモードで ferret One を開いている場合は使えますか？</div>
+        <p class="faq-a">デフォルトではシークレットモードのタブにアクセスできません。<code>chrome://extensions</code> → Meta提案拡張機能の「詳細」→「シークレットモードでの実行を許可」をオンにしてください。ただし、通常ウィンドウで ferret One を開くのが最も簡単です。</p>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">ferret One のカスタムドメイン管理画面では使えますか？</div>
+        <p class="faq-a">拡張機能は URL に「ferret-one」または「page_collection」を含むタブを検索します。カスタムドメインの管理画面では自動検出できない場合があります。<code>cms.ferret-one.com</code> の標準 URL からアクセスしてください。</p>
+      </div>
     </div>
   </div>
 

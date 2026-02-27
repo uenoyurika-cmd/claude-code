@@ -475,6 +475,44 @@ h2 {
   letter-spacing: 0.02em;
 }
 
+.hint-details {
+  font-size: 11px;
+  color: rgba(74, 26, 31, 0.5);
+  margin-top: 6px;
+  background: rgba(74, 26, 31, 0.03);
+  border-radius: 6px;
+  padding: 0;
+}
+.hint-details[open] {
+  padding: 0 10px 8px;
+}
+.hint-details summary {
+  cursor: pointer;
+  padding: 6px 10px;
+  font-weight: 400;
+  color: rgba(74, 26, 31, 0.55);
+  list-style: none;
+}
+.hint-details summary::before {
+  content: "▸ ";
+  font-size: 10px;
+}
+.hint-details[open] summary::before {
+  content: "▾ ";
+}
+.hint-details ul {
+  margin: 4px 0 0 0;
+  padding-left: 16px;
+  line-height: 1.7;
+}
+.hint-details li {
+  margin-bottom: 2px;
+}
+.hint-details strong {
+  color: rgba(74, 26, 31, 0.7);
+  font-weight: 500;
+}
+
 /* ===== Status ===== */
 .status {
   font-size: 12px;
